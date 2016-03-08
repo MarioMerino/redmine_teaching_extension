@@ -1,0 +1,4 @@
+# Spanish strings go here for Rails i18n
+es:
+  label_propagate_issues_configure: Configurar RTE
+  button_propagate: Crear y propagar
