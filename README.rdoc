@@ -1,3 +1,0 @@
-= redmine_teaching_extension
-
-Description goes here
