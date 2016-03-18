@@ -1,0 +1,20 @@
+<p>
+  <%= f.select :assigned_to_id, principals_options_for_select(@issue.assignable_users, @issue.assigned_to), {:required => true, :label => l("concerned_users")},
+               {:multiple => true, :size => 10, style: "display:none;"} %>
+  <%#= render 'users_list' %>
+  <%= link_to l("modify_users"), '#', :onclick => 'showModal("ajax-modal", "1000px");$("#button_apply_users").focus();' %>
+  <%#= link_to l("modify_users"), plugin_teaching_load_users_selection_path(:issue_id => @issue.id, :assigned_to_id => @issue.assigned_to.id),
+              remote: true, id: "loadModalUsersSelection", class: "load-modal-users-selection" %>
+
+</p>
+
+<script>
+  $("#loadModalUsersSelection").click(function(e) {
+    var ids = $('#issue_assigned_to_id').val();
+    if(ids==null) {
+      ids=''
+    }
+    var sep = ($(this).attr('href').indexOf('?') != -1) ? '&' : '?';
+    $(this).attr('href', $(this).attr('href') + sep + 'assigned_to_ids=' + ids );
+  });
+</script>

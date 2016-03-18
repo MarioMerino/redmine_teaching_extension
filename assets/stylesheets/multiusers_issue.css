@@ -1,0 +1,53 @@
+.list_users_names{
+    padding: 2px 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    background: #ffffff;
+    border: 1px solid #d3d3d3;
+    line-height: 24px;
+}
+
+a.list_users_names.hover{
+    color: #ffffff;
+    background-color: darkgrey;
+    text-decoration: none;
+    border: 1px solid darkgrey;
+}
+
+a.list_users_names.current{
+    color: #ffffff;
+    background-color: #707070;
+    border: 1px solid #707070;
+}
+
+#my_users_per_issue{
+    max-height: 150px;
+    overflow: auto;
+    display: flex;
+    width: 77%;
+}
+
+#users_form #my_users_per_issue{
+    width: auto;
+}
+
+td.user .disabled_user{
+    color: #808080;
+    font-style: italic;
+}
+tr:hover td.user .disabled_user, tr.context-menu-selection td.user .disabled_user{
+    color: inherit;
+}
+
+td.users{
+    width: 150px;
+    max-width: 250px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.load-modal-users-selection {
+    line-height:2em;
+}

@@ -1,3 +1,8 @@
 # English strings go here for Rails i18n
 en:
   label_propagate_issues_configure: Configure RTE
+  concerned_users: Impacted students
+  modify_users: "Edit students list"
+  other: "other"
+  user: "user"
+  you_are_not_a_member: ""
