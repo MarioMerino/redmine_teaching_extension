@@ -1,8 +1,11 @@
 # English strings go here for Rails i18n
 en:
-  label_propagate_issues_configure: Configure RTE
-  concerned_users: Impacted students
-  modify_users: "Edit students list"
+  label_propagate_issues_configure: "Configure RTE"
+  button_create_propagate: "Create and propagate"
+  Selection: "Select"
+  field_students: "Students of the subject"
+  select_none: "None"
+  select_all: "All"
   other: "other"
-  user: "user"
+  project: "project"
   you_are_not_a_member: ""

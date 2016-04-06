@@ -1,4 +1,4 @@
-.list_users_names{
+.list_projects_names{
     padding: 2px 4px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -8,39 +8,39 @@
     line-height: 24px;
 }
 
-a.list_users_names.hover{
+a.list_projects_names.hover{
     color: #ffffff;
     background-color: darkgrey;
     text-decoration: none;
     border: 1px solid darkgrey;
 }
 
-a.list_users_names.current{
+a.list_projects_names.current{
     color: #ffffff;
     background-color: #707070;
     border: 1px solid #707070;
 }
 
-#my_users_per_issue{
+#my_projects_per_issue{
     max-height: 150px;
     overflow: auto;
     display: flex;
     width: 77%;
 }
 
-#users_form #my_users_per_issue{
+#projects_form #my_projects_per_issue{
     width: auto;
 }
 
-td.user .disabled_user{
+td.project .disabled_project{
     color: #808080;
     font-style: italic;
 }
-tr:hover td.user .disabled_user, tr.context-menu-selection td.user .disabled_user{
+tr:hover td.project .disabled_project, tr.context-menu-selection td.project .disabled_project{
     color: inherit;
 }
 
-td.users{
+td.projects{
     width: 150px;
     max-width: 250px;
     overflow: hidden;
@@ -48,6 +48,6 @@ td.users{
     text-overflow: ellipsis;
 }
 
-.load-modal-users-selection {
+.load-modal-students-selection {
     line-height:2em;
 }
