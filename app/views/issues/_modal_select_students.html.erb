@@ -1,6 +1,7 @@
-<% issue_projects = @issue.projects|[@issue.project]
-   allowed_projects =  @issue.allowed_target_projects - [@issue.project]
-   custom_fields = CustomField.select("id", "name").where(:type => "ProjectCustomField").where("name IN (?)", Setting["plugin_redmine_teaching_extension"]['custom_fields'])
+<% issue_projects = @issue.projects
+   # Generar issue sólo para cada subproyecto (@issue.project.descendants) del proyecto actual, siempre que se tengan permisos para ello (allowed_target_projects):
+   allowed_projects =  @issue.allowed_target_projects & @issue.project.descendants
+   custom_fields = CustomField.select("id, name")#.where(:type => "ProjectCustomField")
    options_for_selects = {}
    custom_fields.each do |field|
      options_for_selects.merge!(field.name.parameterize => []) # parameterize -> reemplaza el nombre completo por parámetros separados por guión, para adaptarlo mejor a una URL. (ejemplo: .../mario-merino)
@@ -9,7 +10,7 @@
    # Árbol de proyectos como un conjunto anidado de listas desordenadas (proyectos anidados)
    # La colección dada, puede ser un subconjunto del árbol completo de proyectos
    # Algunos nodos intermedios son privados y puede que no sean vistos --> application_helper.rb
-   nested_projects_list = render_project_nested_lists(allowed_projects|issue_projects) do |project|
+   nested_projects_list = render_project_nested_lists(allowed_projects) do |project| # Asignar issue sólo a subproyectos del proyecto padre actual
      custom_fields_data = {}
      if allowed_projects.include?(project)
        custom_fields.each do |f|
@@ -32,11 +33,12 @@
 <div class="actions_links">
   <%= l("Selection") %>:
   <!-- Botón de selección múltiple de proyectos del listado: -->
-  <%= link_to l("select_all"), '#', id: "link_select_all", :onclick=> "select_all()" %>
+  <%= link_to l("select_all"), '#', id: "link_select_all", :onclick=> "select_all(event)" %>
   |
   <!-- Botón de deselección múltiple de proyectos del listado (desmarcar todos los seleccionados): -->
-  <%= link_to l("select_none"), '#', id: "link_select_all", :onclick=> "select_none()" %>
+  <%= link_to l("select_none"), '#', id: "link_select_all", :onclick=> "select_none(event)" %>
   <!-- Selección individual de algunos de los proyectos de la caja de selección de proyectos: -->
+  <hr>
   <% custom_fields.each do |field| %>
       |
       <%= select_tag field.name.parameterize, options_for_select(options_for_selects[field.name.parameterize]),
@@ -54,7 +56,7 @@
 <!-- Botón para guardar los cambios de la selección de proyectos para propagar Issue: -->
 <p class="buttons">
   <%= submit_tag l(:button_apply), :name => nil, :onclick => "updateSelectedProjects();hideModal(this);",
-                 :type => 'button', :id=> 'button_apply_projects' %>
+                 :type => 'button', :id => 'button_apply_projects' %>
 </p>
 
 <script type="text/javascript">
@@ -65,25 +67,29 @@
     $("select#issue_project_ids option").each(function() {
       this.selected = "";
     });
-    var htmlContent = "";
+
     // Para cada uno de los checkbox de proyectos que es seleccionado, se obtiene el valor de sus respectivos IDs...:
     $("input:checkbox[name='project_ids[]']:checked").each(function() {
-      $("#issue_project_ids option[value=" + $(this).val() + "]").attr("selected", "selected");
+      $("#issue_project_ids option[value=" + $(this).val() +"]").prop("selected", true)
     });
-
-    $("input:checkbox[name='project_ids[]']:checked:not(.inactive)").each(function () {
-      htmlContent += "<span class=\"list_projects_names\">" + $(this).closest('label').text() + "</span>";
+    // Cada subproyecto/alumno seleccionado, es mostrado en la vista de 'New issue' con el siguiente formato html:
+    var htmlContent = "";
+    $("input:checkbox[name='project_ids[]']:checked").each(function() {
+      if($(this).val() != <%= @issue.project.id %>){
+        htmlContent += " <span class=\"list_projects_names\">"+ $(this).closest('label').text() + "</span>" + "<br />";
+      }
     });
+    $("#projects_form #list_of_projects_per_issue").html(htmlContent);
+    //if (htmlContent == ""){
+      //$(".and_x_other_projects").css("display", "none");
+    //} else{
+      //$(".and_x_other_projects").css("display","inline");
+    //}
 
-    $("#my_projects").html(htmlContent);
-    if (htmlContent == ""){
-        $(".and_x_other_projects").css("display", "none");
-    } else{
-      $(".and_x_other_projects").css("display","inline");
-    }
   }
   // Función empleada al pinchar en selección múltiple de proyectos (todos seleccionados):
-  function select_all(){
+  function select_all(event){
+    event.preventDefault();
     $("input:checkbox[name='project_ids[]']").each(function()
     {
       $(this).attr("checked","checked");
@@ -91,7 +97,8 @@
   }
 
   // Función empleada al pinchar en deselección múltiple de proyectos (ninguno seleccionado):
-  function select_none(){
+  function select_none(event){
+    event.preventDefault();
     $("input:checkbox[name='project_ids[]']:checked:not(.inactive)").each(function()
     {
       $(this).attr("checked",false);
@@ -99,8 +106,9 @@
   }
 
   // Función empleada al seleccionar algún proyecto
-  function select_from_custom_field(id) {
-    select_none();
+  function select_from_custom_field(event, id) {
+    event.preventDefault();
+    select_none(event);
     $("input:checkbox[name='project_ids[]']:checkbox[data-"+id+"='"+ $("#select_" + id).val() +"']").each(function()
     {
       $(this).attr("checked","checked");

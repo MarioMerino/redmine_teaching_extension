@@ -1,7 +1,7 @@
 # Spanish strings go here for Rails i18n
 es:
-  label_propagate_issues_configure: "Configurar Redmine Teaching Extension"
-  button_create_propagate: "Crear y propagar"
+  button_propagate: "Propagar petición a..."
+  assigned_students: "Alumnos asignados"
   Selection: "Seleccionar"
   field_students: "Alumnos de la asignatura"
   select_none: "Ninguno"

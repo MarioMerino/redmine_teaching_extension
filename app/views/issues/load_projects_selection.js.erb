@@ -1,7 +1,7 @@
 // Función empleada (usando AJAX) para abrir la ventana de diálogo correspondiente a la selección múltiple de proyectos:
 $(document).ready(function(){
   $('#ajax-modal').html('<%= escape_javascript(render :partial => 'issues/modal_select_students') %>');
-  showModal("ajax-modal", "1000px");
+  showModal("ajax-modal", "600px");
   $("#button_apply_projects").focus();
-  studentsSelectionAlreadyLoaded = true;
+  projectsSelectionAlreadyLoaded = true;
 });

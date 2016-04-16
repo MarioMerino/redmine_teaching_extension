@@ -20,34 +20,3 @@ a.list_projects_names.current{
     background-color: #707070;
     border: 1px solid #707070;
 }
-
-#my_projects_per_issue{
-    max-height: 150px;
-    overflow: auto;
-    display: flex;
-    width: 77%;
-}
-
-#projects_form #my_projects_per_issue{
-    width: auto;
-}
-
-td.project .disabled_project{
-    color: #808080;
-    font-style: italic;
-}
-tr:hover td.project .disabled_project, tr.context-menu-selection td.project .disabled_project{
-    color: inherit;
-}
-
-td.projects{
-    width: 150px;
-    max-width: 250px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.load-modal-students-selection {
-    line-height:2em;
-}

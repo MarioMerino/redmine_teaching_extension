@@ -10,7 +10,13 @@
       <div id="all_attributes">
         <%= render :partial => 'issues/form', :locals => {:f => f} %>
       </div>
-
+      <!-- Listado de proyectos seleccionados para propagarles issue: -->
+      <p id="projects_form">
+        <% select_options = project_tree_options_for_select((@issue.allowed_target_projects & @issue.project.descendants) , :selected => @issue.projects)#[@issue.project]|@issue.projects) %>
+        <%= f.select :project_ids, select_options, {:required => false, :label => l("assigned_students")},
+                     {:multiple => true, style: "display:none;"} %>
+        <%= render 'projects_students_list' %>
+      </p>
       <% if @copy_from && @copy_from.attachments.any? %>
           <p>
             <label for="copy_attachments"><%= l(:label_copy_attachments) %></label>
@@ -44,8 +50,11 @@
     <%= submit_tag l(:button_create) %>
     <%= submit_tag l(:button_create_and_continue), :name => 'continue' %>
     <%= preview_link preview_new_issue_path(:project_id => @project), 'issue-form' %>
-    <!-- Enlace para abrir la ventana de diálogo (showModal()) donde se mostrará la selección de proyectos:  -->
-    <%= link_to l("button_create_propagate"), load_students_selection_issue_path(@issue.id), remote: true, id: "loadModalStudentsSelection" %>
+    <!-- Enlace para abrir la ventana de diálogo (showModal()) donde se mostrará la selección de proyectos  -->
+    <!-- Se genera la ruta de la issue en cuestión (...selection_path(id)) al pinchar en el enlace, para identificar sobre qué proyecto se está operando:  -->
+    <%= link_to l("button_propagate"), plugin_teaching_extension_load_students_selection_path(:issue_id => @issue.id, :project_id => @issue.project.id), remote: true, id: "loadModalProjectsSelection" %>
+    <%#= link_to l("button_create_propagate"), '#', :onclick => 'showModal("ajax-modal", "1000px");$("#button_apply_projects").focus();' %>
+
 <% end %>
 
 <div id="preview" class="wiki"></div>
