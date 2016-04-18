@@ -7,10 +7,10 @@ class Query
   # Función que devuelve el array de proyectos disponibles para ser seleccionados para su propagación:
   def project_statement
 
-    project_agrupation = principal_project_statement
+    project_clauses = principal_project_statement
 
-    if project_agrupation
-      "((#{project_agrupation}) OR issues.id IN (SELECT issue_id FROM issues_projects WHERE project_id = #{project.id}))"
+    if project_clauses
+      "((#{project_clauses}) OR #{Issue.table_name}.id IN (SELECT issue_id FROM issues_projects WHERE project_id = #{project.id}))"
     else
       nil
     end

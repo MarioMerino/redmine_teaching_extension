@@ -2,10 +2,9 @@ require_dependency 'issues_controller'
 
 class IssuesController
 
-  append_before_filter :set_projects, :only => [:create, :update]
-
-  before_filter :authorize, :except => [:index, :load_projects_selection] # Autorizar al usuario para realizar todas las acciones, excepto 'index' y 'load_students_selection'
+  before_filter :authorize, :except => [:index, :load_projects_selection, :show] # Autorizar al usuario para realizar todas las acciones, excepto 'index', 'load_students_selection' y 'show'
   before_filter :set_project, :only => [:load_projects_selection] # Establecer un proyecto para ser cargado, sólo para la accion 'load_students_selection'
+  append_before_filter :set_projects, :only => [:create, :update]
 
   # Función de carga de proyectos a partir de una issue:
   def load_projects_selection
@@ -21,10 +20,6 @@ class IssuesController
   private
     # Se establece el listado de proyectos que se va a cargar para aplicarles la propagación de issues:
     def set_projects
-      #@projects = [Project.find(params[:project_id])]
-      #@projects << Project.find((params[:issue] && params[:issue][:project_ids]).reject!(&:blank?))
-      #@projects.uniq!
-      #@issue.projects << @projects
       @projects = []
       @projects << Project.find(params[:project_id]) if params[:project_id]
       if params[:issue] && params[:issue][:project_ids]

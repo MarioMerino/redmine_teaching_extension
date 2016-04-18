@@ -21,13 +21,13 @@
       <% if visible_projects > 0 %>
         <span class="and_x_other_projects"><%= l("support.array.sentence_connector") %></span>
           <%= other_projects %>
-          <span class="and_x_other_projects"><%= other_projects>1 ? l("other").pluralize : l("other") %></span>
+          <span class="and_x_other_projects"><%= other_projects > 1 ? l("other").pluralize : l("other") %></span>
       <% else %>
         <span class="and_x_other_projects" style="display: none;"><%= l("support.array.sentence_connector") %></span>
           <%= other_projects %>
-          <span class="and_x_other_projects" style="display: none;"><%= other_projects>1 ? l("other").pluralize : l("other") %></span>
+          <span class="and_x_other_projects" style="display: none;"><%= other_projects > 1 ? l("other").pluralize : l("other") %></span>
       <% end %>
-      <%= other_projects>1 ? l("project").pluralize : l("project") %>
+      <%= other_projects > 1 ? l("project").pluralize : l("project") %>
     </span>
   <% end %>
 </span>
