@@ -6,6 +6,7 @@ ActionDispatch::Callbacks.to_prepare do
   require_dependency 'redmine_teaching_extension/hooks'
   require_dependency 'redmine_teaching_extension/issue'
   require_dependency 'redmine_teaching_extension/query'
+  require_dependency 'redmine_teaching_extension/issues_helper'
 end
 
 CHECKLISTS_VERSION_NUMBER = '0.0.1'

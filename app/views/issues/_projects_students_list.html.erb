@@ -1,33 +1,22 @@
 <%
    other_projects = 0
    visible_projects = 0
-   issue_projects = @issue.projects
-   allowed_projects = @issue.allowed_target_projects & @issue.project.descendants
+   issue_projects = [@issue.project] | @issue.projects
+   allowed_members_projects = @issue.assignable_users_subprojects #@issue.allowed_target_projects & @issue.project.descendants
 %>
 <!-- Sección del listado de alumnos/subproyectos de la asignatura -->
-<span id="my_projects_per_issue">
-  <span id="list_of_projects_per_issue">
-    <% issue_projects.each do |project| %>
-      <% if allowed_projects.include?(project) %>
-        <%= content_tag("span", link_to(project.name.gsub(/ /, "&nbsp;").html_safe, project_issues_path(project)), class: "list_projects_names") %>
+<span id="my_members_per_issue">
+  <span id="list_of_members_per_issue">
+    <% issue_projects.each do |user| %>
+      <% if allowed_members_projects.include?(user) %>
+            <!-- Modificar para que solo muestre el subproyecto asignado al usuario actual (current). De no poder solucionarlo,
+             eliminar esta sección y, simplemente, dotar de permisos de edición y borrado al miembro de dicho subproyecto... -->
+        <%= content_tag("span", user.name.gsub(/ /,"&nbsp;").html_safe, class: "list_users_names") %>
         <% visible_projects += 1 %>
       <% else %>
         <% other_projects += 1 %>
       <% end %>
     <% end %>
   </span>
-  <% if other_projects > 0 %>
-    <span class="list_other_projects">
-      <% if visible_projects > 0 %>
-        <span class="and_x_other_projects"><%= l("support.array.sentence_connector") %></span>
-          <%= other_projects %>
-          <span class="and_x_other_projects"><%= other_projects > 1 ? l("other").pluralize : l("other") %></span>
-      <% else %>
-        <span class="and_x_other_projects" style="display: none;"><%= l("support.array.sentence_connector") %></span>
-          <%= other_projects %>
-          <span class="and_x_other_projects" style="display: none;"><%= other_projects > 1 ? l("other").pluralize : l("other") %></span>
-      <% end %>
-      <%= other_projects > 1 ? l("project").pluralize : l("project") %>
-    </span>
-  <% end %>
+
 </span>

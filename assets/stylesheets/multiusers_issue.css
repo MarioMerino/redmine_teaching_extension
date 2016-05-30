@@ -1,4 +1,4 @@
-.list_projects_names{
+.list_users_names{
     padding: 2px 4px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -8,15 +8,65 @@
     line-height: 24px;
 }
 
-a.list_projects_names.hover{
+a.list_users_names.hover{
     color: #ffffff;
     background-color: darkgrey;
     text-decoration: none;
     border: 1px solid darkgrey;
 }
 
-a.list_projects_names.current{
+a.list_users_names.current{
     color: #ffffff;
     background-color: #707070;
     border: 1px solid #707070;
+}
+
+#label_assigned_students{
+    font-family: Verdana, sans-serif;
+    color: #484848;
+    width: 22%;
+    font-weight: bold;
+    margin: 0 0 0 3px;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.users_container {
+    max-height: 500px;
+    overflow: auto;
+    border-bottom: 1px solid #d3d3d3;
+}
+
+#users_list.columns {
+    padding-bottom: 10px;
+}
+
+#users_list option.inactive {
+    color: #d3d3d3;
+}
+
+.splitcontentteaching {overflow:auto;}
+
+.splitcontentteachingleft{float:left; width:49%;}
+
+#members_form{
+    width: auto;
+}
+/* En principio, no se usará (sólo afecta en caso de mostrar peticiones en 'show.html.erb')
+td.project .disabled_project{
+    color: #808080;
+    font-style: italic;
+}
+
+tr:hover td.project .disabled_project, tr.context-menu-selection td.project .disabled_project{
+    color: inherit;
+}
+*/
+.hide_journal_details{
+    display: none;
+    margin-right: 5px;
+}
+
+.load-modal-projects-selection {
+    line-height:2em;
 }

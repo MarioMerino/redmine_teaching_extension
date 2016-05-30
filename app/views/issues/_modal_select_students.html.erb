@@ -1,31 +1,35 @@
-<% issue_projects = @issue.projects
-   # Generar issue sólo para cada subproyecto (@issue.project.descendants) del proyecto actual, siempre que se tengan permisos para ello (allowed_target_projects):
-   allowed_projects =  @issue.allowed_target_projects & @issue.project.descendants
+<%
    custom_fields = CustomField.select("id, name")#.where(:type => "ProjectCustomField")
    options_for_selects = {}
    custom_fields.each do |field|
      options_for_selects.merge!(field.name.parameterize => []) # parameterize -> reemplaza el nombre completo por parámetros separados por guión, para adaptarlo mejor a una URL. (ejemplo: .../mario-merino)
    end
 
-   # Árbol de proyectos como un conjunto anidado de listas desordenadas (proyectos anidados)
-   # La colección dada, puede ser un subconjunto del árbol completo de proyectos
-   # Algunos nodos intermedios son privados y puede que no sean vistos --> application_helper.rb
-   nested_projects_list = render_project_nested_lists(allowed_projects) do |project| # Asignar issue sólo a subproyectos del proyecto padre actual
-     custom_fields_data = {}
-     if allowed_projects.include?(project)
-       custom_fields.each do |f|
-         value = project.custom_field_value(f)
-         custom_fields_data.merge!(f.name.parameterize => value)
-         options_for_selects[f.name.parameterize] << value unless options_for_selects[f.name.parameterize].include?(value) || value == ""
-       end
-     end
-
-     content_tag('label', check_box_tag('project_ids[]', project.id, @issue != nil && issue_projects.include?(project),
-                                          disabled: allowed_projects.include?(project) ? false : true,
-                                          :class => ("inactive" unless allowed_projects.include?(project)),
-                                          data: custom_fields_data) + ' ' + h(project.name), :class => ("inactive" unless allowed_projects.include?(project))
-     )
-   end
+   # Función para cargar correctamente la selección de miembros/estudiantes implicados...
+   #users_list = principals_check_box_propagation('assigned_to_ids[]', @issue.assignable_users_subprojects, @issue.assigned_to) #do || <-- Intentar desarrollar bucle...
+   users_list = principals_check_box_propagation('assigned_to_ids[]', @issue.assignable_users_subprojects, @issue.assigned_to)
+     #custom_fields_data = {}
+     #if allowed_members.include?(assigned)
+     #  custom_fields.each do |f|
+     #    value = custom_values[assigned.id][f.id]
+     #    value = value.join(",") if value.is_a?(Array)
+     #    custom_fields_data.merge!(f.name.parameterize => value)
+     #    value.split(",").each do |val|
+     #      options_for_selects[f.name.parameterize] << val unless options_for_selects[f.name.parameterize].include?(val) || val.blank?
+     #    end if value.present?
+     #  end
+     #end
+     #content_tag('label',
+     #            check_box_tag(
+     #                'assigned_to_ids[]',
+     #                assigned.id,
+     #                @issue != nil && allowed_members.include?(assigned),
+     #                disabled: allowed_members.include?(assigned) ? false : true,
+     #                :class => ("inactive" unless allowed_members.include?(assigned)),
+     #                data: custom_fields_data
+     #            ) + ' ' + h(assigned.name), :class => ("inactive" unless allowed_members.include?(assigned))
+     #)
+   #end
 %>
 
 <h3 class="title"><%= l(:field_students) %></h3>
@@ -48,38 +52,38 @@
   <% end %>
 </div>
 
-<div class="projects_container">
-  <div class="columns" id="project_nested_list">
-    <%= nested_projects_list %> <!-- Listado de proyectos a seleccionar -->
+<div class="users_container">
+  <div class="columns" id="users_list">
+    <%= users_list %> <!-- Listado de usuarios a seleccionar -->
   </div>
 </div>
 <!-- Botón para guardar los cambios de la selección de proyectos para propagar Issue: -->
 <p class="buttons">
-  <%= submit_tag l(:button_apply), :name => nil, :onclick => "updateSelectedProjects();hideModal(this);",
-                 :type => 'button', :id => 'button_apply_projects' %>
+  <%= submit_tag l(:button_apply), :name => nil, :onclick => "updateSelectedUsers();hideModal(this);",
+                 :type => 'button', :id => 'button_apply_members' %>
 </p>
 
 <script type="text/javascript">
 
-  // Función aplicada al seleccionar y/o actualizar algun proyecto del listado de proyectos:
-  function updateSelectedProjects() {
-    // Se obtienen todas las opciones de la seleccion de proyectos, pasando el ID de los proyectos:
-    $("select#issue_project_ids option").each(function() {
-      this.selected = "";
-    });
+  // Función aplicada al seleccionar y/o actualizar algun miembro del listado de miembros/estudiantes:
+  function updateSelectedUsers() {
+    // Se obtienen todas las opciones de la seleccion de miembros, pasando el ID de los miembros:
+    $("select#issue_assigned_to_id option").each(function() { this.selected = ""; });
 
-    // Para cada uno de los checkbox de proyectos que es seleccionado, se obtiene el valor de sus respectivos IDs...:
-    $("input:checkbox[name='project_ids[]']:checked").each(function() {
-      $("#issue_project_ids option[value=" + $(this).val() +"]").prop("selected", true)
+    // Para cada uno de los checkbox de miembros que es seleccionado, se obtiene el valor de sus respectivos IDs...:
+    $("input:checkbox[name='assigned_to_ids[]']:checked").each(function() {
+      $("#issue_assigned_to_id option[value=" + $(this).val() +"]").prop("selected", true);
+
     });
-    // Cada subproyecto/alumno seleccionado, es mostrado en la vista de 'New issue' con el siguiente formato html:
+    // Cada alumno seleccionado, es mostrado en la vista de 'New issue' con el siguiente formato html:
     var htmlContent = "";
-    $("input:checkbox[name='project_ids[]']:checked").each(function() {
-      if($(this).val() != <%= @issue.project.id %>){
-        htmlContent += " <span class=\"list_projects_names\">"+ $(this).closest('label').text() + "</span>" + "<br />";
-      }
+    $("input:checkbox[name='assigned_to_ids[]']:checked").each(function() {
+      //if($(this).val() != <%#= @issue.project.id %>){
+        htmlContent += "<span class=\"list_users_names\">"+ $(this).closest('option').text() + "</span>" + "<br />";
+        // Introducir que al seleccionar usuario del listado anterior, se seleccione a su vez dicho usuario en el selector de 'Assignar estudiante'
+      //}
     });
-    $("#projects_form #list_of_projects_per_issue").html(htmlContent);
+    $("#members_form #list_of_members_per_issue").html(htmlContent);
     //if (htmlContent == ""){
       //$(".and_x_other_projects").css("display", "none");
     //} else{
@@ -87,29 +91,30 @@
     //}
 
   }
-  // Función empleada al pinchar en selección múltiple de proyectos (todos seleccionados):
+
+  // Función empleada al pinchar en selección múltiple de miembros/alumnos (todos seleccionados):
   function select_all(event){
     event.preventDefault();
-    $("input:checkbox[name='project_ids[]']").each(function()
+    $("input:checkbox[name='assigned_to_ids[]']").each(function()
     {
       $(this).attr("checked","checked");
     });
   }
 
-  // Función empleada al pinchar en deselección múltiple de proyectos (ninguno seleccionado):
+  // Función empleada al pinchar en deselección múltiple de miembros/alumnos (ninguno seleccionado):
   function select_none(event){
     event.preventDefault();
-    $("input:checkbox[name='project_ids[]']:checked:not(.inactive)").each(function()
+    $("input:checkbox[name='assigned_to_ids[]']:checked:not(.inactive)").each(function()
     {
       $(this).attr("checked",false);
     });
   }
 
-  // Función empleada al seleccionar algún proyecto
+  // Función empleada al seleccionar algún miembro/alumno
   function select_from_custom_field(event, id) {
     event.preventDefault();
     select_none(event);
-    $("input:checkbox[name='project_ids[]']:checkbox[data-"+id+"='"+ $("#select_" + id).val() +"']").each(function()
+    $("input:checkbox[name='assigned_to_ids[]']:checkbox[data-"+id+"='"+ $("#select_" + id).val() +"']").each(function()
     {
       $(this).attr("checked","checked");
     });

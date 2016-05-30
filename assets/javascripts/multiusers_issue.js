@@ -1,14 +1,21 @@
 /**
  * Created by mariomerino on 6/04/16.
  */
-// Función que comprueba que los estudiantes/subproyectos del diálogo de selección, han sido ya cargados...
-var projectsSelectionAlreadyLoaded = false;
+
+// Función que establece cómo se cargarán los detalles del histórico de la petición correspondiente...
 $(document).ready(function(){
-    $('#all_attributes').on("click", "#loadModalProjectsSelection", function(e) {
-        if(projectsSelectionAlreadyLoaded == true){
-            showModal('ajax-modal', '1000px');
-            $('#button_apply_projects').focus();
-            return false;
-        }
+
+    $('.details').on("click", ".show_journal_details", function(e) {
+        e.preventDefault();
+        $('.journal_projects_details[data-detail-id='+$(this).data('detail-id')+']').show();
+        $('.hide_journal_details[data-detail-id='+$(this).data('detail-id')+']').show();
+        $(this).hide();
+    });
+
+    $('.details').on("click", ".hide_journal_details", function(e) {
+        e.preventDefault();
+        $('.journal_projects_details[data-detail-id='+$(this).data('detail-id')+']').hide();
+        $('.show_journal_details[data-detail-id='+$(this).data('detail-id')+']').show();
+        $(this).hide();
     });
 });

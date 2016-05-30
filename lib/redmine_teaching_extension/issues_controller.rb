@@ -2,12 +2,12 @@ require_dependency 'issues_controller'
 
 class IssuesController
 
-  before_filter :authorize, :except => [:index, :load_projects_selection, :show] # Autorizar al usuario para realizar todas las acciones, excepto 'index', 'load_students_selection' y 'show'
-  before_filter :set_project, :only => [:load_projects_selection] # Establecer un proyecto para ser cargado, sólo para la accion 'load_students_selection'
-  append_before_filter :set_projects, :only => [:create, :update]
+  before_filter :authorize, :except => [:index, :load_students_selection, :show] #:allow_target_projects] # Autorizar al usuario para realizar todas las acciones, excepto 'index', 'load_students_selection' y 'show'
+  before_filter :set_project, :only => [:load_students_selection] # Establecer un proyecto para ser cargado, sólo para la accion 'load_students_selection'
+  #append_before_filter :set_members, :only => [:create, :update]
 
-  # Función de carga de proyectos a partir de una issue:
-  def load_projects_selection
+  # Función de carga de usuarios a partir de una issue:
+  def load_students_selection
     #@issue = Issue.find(params[:id])
     if params[:issue_id]
       @issue = Issue.find(params[:issue_id])
@@ -17,19 +17,71 @@ class IssuesController
     @issue.project = @project
   end
 
+  #def allow_target_projects
+  #  if User.current.allowed_to?(:add_issues, @projects)
+  #    @allowed_projects = Issue.allowed_target_projects
+  #    if params[:issue]
+  #      @target_project = @allowed_projects.detect {|p| p.id.to_s == params[:issue][:project_id].to_s}
+  #      if @target_project
+  #        target_projects = [@target_project]
+  #      end
+  #    end
+  #  end
+  #  target_projects ||= @projects
+
+  #  @custom_fields = target_projects.map{|p|p.all_issue_custom_fields.visible}.reduce(:&)
+  #  @assignables = target_projects.map(&:assignable_users).reduce(:&)
+  #  @trackers = target_projects.map(&:trackers).reduce(:&)
+  #  @versions = target_projects.map {|p| p.shared_versions.open}.reduce(:&)
+  #  @categories = target_projects.map {|p| p.issue_categories}.reduce(:&)
+
+  #  @safe_attributes = @issues.map(&:safe_attribute_names).reduce(:&)
+
+  #  @issue_params = params[:issue] || {}
+  #  @issue_params[:custom_field_values] ||= {}
+  #end
+
   private
-    # Se establece el listado de proyectos que se va a cargar para aplicarles la propagación de issues:
-    def set_projects
-      @projects = []
-      @projects << Project.find(params[:project_id]) if params[:project_id]
-      if params[:issue] && params[:issue][:project_ids]
-        Project.find((params[:issue][:project_ids]).reject!(&:blank?)).each do |p|
-          @projects << p
-        end
+    # Se establece el listado de miembros que se va a cargar para aplicarles la propagación de issues:
+    def set_members
+      #@projects = []
+      @subproject_members = []
+      #@projects << Project.find(params[:project_id]) if params[:project_id]
+      @subprojects << Project.where(:parent_id => project)
+      @subprojects.each do |subproject|
+        @subproject_members += Principal.member_of(subproject)
       end
-      @projects.uniq!
-      @issue.projects = @projects
+      #if params[:issue] && params[:issue][:project_ids]
+      #  params[:issue][:project_ids].reject!(&:blank?)
+      #  if params[:issue][:project_ids].present?
+      #    Project.find(params[:issue][:project_ids]).each do |p|
+      #      @projects << p
+      #    end
+      #  end
+      #end
+      @users = @subproject_members
+      @users << Issue.find(params[:author_id]) if params[:author_id]
+      @users << Issue.find(params[:assigned_to_id]) if params[:assigned_to_id]
+      @users.uniq.sort
+      #@projects.uniq!
+      #@issue.projects = @projects
     end
+
+    # Se actualiza el histórico de la issue propagada a los proyectos en cuestión:
+    #def update_project_journal
+    #  @current_journal = @issue.init_journal(User.current) # Se asocia el histórico actual al usuario actual.
+    #  @projects_before_change = @issue.projects # Se declara la situación previa a cualquier actualización del histórico.
+
+      # Se añade en el histórico actual, el registro de la situación actual del mismo (antes de actualizar)
+    #  @current_journal.details << JournalDetail.new(:property => 'projects',
+    #                                                :old_value => (@projects_before_change - @projects).reject(&:blank?),
+    #                                                :value => nil) if (@projects_before_change - @projects).present?
+
+      # Se añade en el histórico actual, el registro actualizado del histórico (una vez realizado los cambios pertinentes)
+    #  @current_journal.details << JournalDetail.new(:property => 'projects',
+    #                                                :old_value => nil,
+    #                                                :value => (@projects - @projects_before_change).reject(&:blank?).join(",")) if (@projects - @projects_before_change).present?
+    #end
 
     # Se establece un proyecto en concreto para ser cargado y propagarle la issue en cuestión:
     def set_project
@@ -38,4 +90,5 @@ class IssuesController
     rescue ActiveRecord::RecordNotFound # Tratamiento de una excepción: No se encuentra un registro de proyecto en la BD...
       render_404 # ... por tanto, lanzar error 404.
     end
+
 end

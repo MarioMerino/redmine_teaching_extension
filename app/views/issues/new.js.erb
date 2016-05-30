@@ -1,0 +1,13 @@
+var involved_member_ids = $('#issue_assigned_to_id').val();
+if(involved_member_ids==null) {
+  involved_member_ids='';
+}
+replaceIssueFormWith('<%= escape_javascript(render :partial => 'form') %>'); // Cambiar partial 'form' al correspondiente en este caso, que sería el contenido de 'new'
+
+$('#issue_assigned_to_id').val(involved_member_ids);
+
+var htmlContent = "";
+$.each(involved_member_ids, function(key, name) {
+  htmlContent += " <span class=\"list_users_names\">"+ $('#issue_assigned_to_id option[value='+name+']').html().replace(/&nbsp;/g, '') + "</span>";
+});
+$("#members_form #list_of_members_per_issue").html(htmlContent);
