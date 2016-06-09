@@ -45,6 +45,14 @@ a.list_users_names.current{
     color: #d3d3d3;
 }
 
+#project_list.columns {
+    padding-bottom: 10px;
+}
+
+#project_list label.inactive{
+    color: #d3d3d3;
+}
+
 .splitcontentteaching {overflow:auto;}
 
 .splitcontentteachingleft{float:left; width:49%;}

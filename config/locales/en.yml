@@ -1,9 +1,9 @@
 # English strings go here for Rails i18n
 en:
   button_propagate: "Propagate issue to..."
-  assigned_students: "Assigned students"
+  assigned_students: "Assignee"
   Selection: "Select"
-  field_students: "Students of the subject"
+  field_students: "Members of the subject"
   select_none: "None"
   select_all: "All"
   other: "other"

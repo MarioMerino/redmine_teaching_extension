@@ -1,9 +1,9 @@
 # Spanish strings go here for Rails i18n
 es:
   button_propagate: "Propagar petición a..."
-  assigned_students: "Alumnos asignados"
+  assigned_students: "Asignado a"
   Selection: "Seleccionar"
-  field_students: "Alumnos de la asignatura"
+  field_students: "Miembros de la asignatura"
   select_none: "Ninguno"
   select_all: "Todos"
   other: "otro"

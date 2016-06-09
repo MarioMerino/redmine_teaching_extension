@@ -12,26 +12,23 @@
         <%= render :partial => 'issues/form', :locals => {:f => f} %>
       </div>
       <!-- Listado de miembros seleccionados para propagarles issue: -->
-      <!-- AVERIGUAR CÓMO ASIGNAR ISSUE AL SUBPROYECTO DEL MIEMBRO IMPLICADO (CAMBIAR PROPIEDAD DE LA ISSUE PARA QUE SE ENVIE A SUBPROYECTO DE USUARIO EN CUESTIÓN) -->
       <div class="splitcontentteaching">
         <div class="splitcontentteachingleft">
           <% if @issue.safe_attribute? 'assigned_to_id' %>
-              <% select_options = principals_options_for_selection(@issue.assignable_users_subprojects, @issue.assigned_to) %>
-            <p>
+            <% select_options = principals_options_for_selection(@issue.assignable_users_subprojects, @issue.assigned_to) %>
+            <p id="members_form">
               <%= f.select :assigned_to_id, select_options, {:required => @issue.required_attribute?('assigned_to_id'), :include_blank => true, :label => l('assigned_students')},
-                  {:multiple => true} %>
+                  {:multiple => true, style: "display:none;"} %>
               <%= render 'projects_students_list' %>
             </p>
+
+            <p style="display: none">
+              <% select_options = project_tree_options_for_select([@issue.project] | @issue.project.descendants, :selected => @issue.project) %>
+              <%= f.select :project_id, select_options, {:required => false, :include_blank => true},
+                           :onchange => "updateIssueFrom('#{escape_javascript project_issue_form_path(@project, :id => @issue, :format => 'js')}')" %>
+            </p>
           <% end %>
-          <!-- SE PUEDE ASIGNAR ISSUE A SUBPROYECTO (DESDE EL PROYECTO PRINCIPAL). DICHA ISSUE PUEDE SER MODIFICADA
-       POR EL MIEMBRO DEL SUBPROYECTO, SIN NECESIDAD DE ASIGNARLE LA ISSUE. VERIFICAR POR QUÉ (REVISAR MODELO ISSUE): -->
-          <!-- VALORAR SIGUIENTE FUNCIONALIDAD: AL SELECCIONAR UN MIEMBRO DE SUBPROYECTO, SE AUTOSELECCIONA SU SUBPROYECTO
-           CORRESPONDIENTE. DE ESTE MODO, SE GENERA ISSUE EN DICHA DUPLA SUBPROYECTO/MIEMBRO-->
-          <p>
-            <% select_options = project_tree_options_for_select([@issue.project] | @issue.project.descendants, :selected => @issue.project) %>
-            <%= f.select :project_id, select_options, {:required => false, :include_blank => true},
-                         :onchange => "updateIssueFrom('#{escape_javascript project_issue_form_path(@project, :id => @issue, :format => 'js')}')" %>
-          </p>
+
         </div>
       </div>
 
@@ -80,7 +77,7 @@
   $("#loadModalStudentsSelection").click(function(e) {
     var ids = $('#issue_assigned_to_id').val();
     if(ids==null) {
-      ids=''
+      ids='';
     }
     var sep = ($(this).attr('href').indexOf('?') != -1) ? '&' : '?';
     $(this).attr('href', $(this).attr('href') + sep + 'assigned_to_ids=' + ids );

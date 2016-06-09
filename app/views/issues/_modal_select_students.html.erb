@@ -1,35 +1,53 @@
 <%
-   custom_fields = CustomField.select("id, name")#.where(:type => "ProjectCustomField")
+   if params[:project_id]
+     project_id = params[:project_id].split(',')
+     issue_projects = ( project_id.present? ? Project.find(project_id) : [] )
+   else
+     issue_projects = @issue.projects
+   end
+   issue_projects = issue_projects | [@issue.project]
+   allowed_projects =  @issue.allowed_target_projects - [@issue.project] & @issue.project.descendants
+
+   custom_fields = CustomField.select("id, name")
    options_for_selects = {}
    custom_fields.each do |field|
      options_for_selects.merge!(field.name.parameterize => []) # parameterize -> reemplaza el nombre completo por parámetros separados por guión, para adaptarlo mejor a una URL. (ejemplo: .../mario-merino)
    end
 
+   custom_fields_project = CustomField.select("id, name")
+   custom_values = custom_values_by_projects(allowed_projects, custom_fields_project)
+   options_for_selects_project = {}
+   custom_fields_project.each do |field|
+     options_for_selects_project.merge!(field.name.parameterize => []) # parameterize -> reemplaza el nombre completo por parámetros separados por guión, para adaptarlo mejor a una URL. (ejemplo: .../mario-merino)
+   end
+
    # Función para cargar correctamente la selección de miembros/estudiantes implicados...
-   #users_list = principals_check_box_propagation('assigned_to_ids[]', @issue.assignable_users_subprojects, @issue.assigned_to) #do || <-- Intentar desarrollar bucle...
    users_list = principals_check_box_propagation('assigned_to_ids[]', @issue.assignable_users_subprojects, @issue.assigned_to)
-     #custom_fields_data = {}
-     #if allowed_members.include?(assigned)
-     #  custom_fields.each do |f|
-     #    value = custom_values[assigned.id][f.id]
-     #    value = value.join(",") if value.is_a?(Array)
-     #    custom_fields_data.merge!(f.name.parameterize => value)
-     #    value.split(",").each do |val|
-     #      options_for_selects[f.name.parameterize] << val unless options_for_selects[f.name.parameterize].include?(val) || val.blank?
-     #    end if value.present?
-     #  end
-     #end
-     #content_tag('label',
-     #            check_box_tag(
-     #                'assigned_to_ids[]',
-     #                assigned.id,
-     #                @issue != nil && allowed_members.include?(assigned),
-     #                disabled: allowed_members.include?(assigned) ? false : true,
-     #                :class => ("inactive" unless allowed_members.include?(assigned)),
-     #                data: custom_fields_data
-     #            ) + ' ' + h(assigned.name), :class => ("inactive" unless allowed_members.include?(assigned))
-     #)
-   #end
+
+   # Función para cargar correctamente la selección de subproyectos implicados...
+   nested_projects_list = render_project_nested_lists(allowed_projects|issue_projects) do |project|
+     custom_fields_data = {}
+     if allowed_projects.include?(project)
+       custom_fields_project.each do |f|
+         value = custom_values[project.id][f.id]
+         value = value.join(",") if value.is_a?(Array)
+         custom_fields_data.merge!(f.name.parameterize => value)
+         value.split(",").each do |val|
+           options_for_selects_project[f.name.parameterize] << val unless options_for_selects_project[f.name.parameterize].include?(val) || val.blank?
+         end if value.present?
+       end
+     end
+     content_tag('label',
+                 check_box_tag(
+                     'project_ids[]',
+                     project.id,
+                     @issue != nil && allowed_projects.include?(project) && issue_projects.include?(project),
+                     #disabled: allowed_projects.include?(project) ? false : true,
+                     #:class => ("inactive" unless allowed_projects.include?(project)),
+                     data: custom_fields_data, :onchange => "select_from_custom_field(event);"
+                 ) + ' ' + h(project.name)#, :class => ("inactive" unless allowed_projects.include?(project))
+     )
+   end
 %>
 
 <h3 class="title"><%= l(:field_students) %></h3>
@@ -43,23 +61,27 @@
   <%= link_to l("select_none"), '#', id: "link_select_all", :onclick=> "select_none(event)" %>
   <!-- Selección individual de algunos de los proyectos de la caja de selección de proyectos: -->
   <hr>
-  <% custom_fields.each do |field| %>
-      |
-      <%= select_tag field.name.parameterize, options_for_select(options_for_selects[field.name.parameterize]),
+  <%# custom_fields_project.each do |field| %>
+      <!--|-->
+      <%#= select_tag field.name.parameterize, options_for_select(options_for_selects_project[field.name.parameterize]),
                      :prompt => field.name, :id => "select_#{field.name.parameterize}",
                      :class => "select_box_custom_field_value",
-                     :onchange=> "select_from_custom_field('#{field.name.parameterize}')" %>
-  <% end %>
+                     :onchange => "select_from_custom_field(event)" %>
+  <%# end %>
+
 </div>
 
 <div class="users_container">
   <div class="columns" id="users_list">
     <%= users_list %> <!-- Listado de usuarios a seleccionar -->
   </div>
+  <div class="columns" id="project_list" style="display: none">
+    <%= nested_projects_list %>
+  </div>
 </div>
 <!-- Botón para guardar los cambios de la selección de proyectos para propagar Issue: -->
 <p class="buttons">
-  <%= submit_tag l(:button_apply), :name => nil, :onclick => "updateSelectedUsers();hideModal(this);",
+  <%= submit_tag l(:button_apply), :name => nil, :onclick => "updateSelectedUsers();updateSelectedProjects();hideModal(this);",
                  :type => 'button', :id => 'button_apply_members' %>
 </p>
 
@@ -67,20 +89,19 @@
 
   // Función aplicada al seleccionar y/o actualizar algun miembro del listado de miembros/estudiantes:
   function updateSelectedUsers() {
+
     // Se obtienen todas las opciones de la seleccion de miembros, pasando el ID de los miembros:
     $("select#issue_assigned_to_id option").each(function() { this.selected = ""; });
 
     // Para cada uno de los checkbox de miembros que es seleccionado, se obtiene el valor de sus respectivos IDs...:
     $("input:checkbox[name='assigned_to_ids[]']:checked").each(function() {
       $("#issue_assigned_to_id option[value=" + $(this).val() +"]").prop("selected", true);
-
     });
     // Cada alumno seleccionado, es mostrado en la vista de 'New issue' con el siguiente formato html:
     var htmlContent = "";
     $("input:checkbox[name='assigned_to_ids[]']:checked").each(function() {
       //if($(this).val() != <%#= @issue.project.id %>){
         htmlContent += "<span class=\"list_users_names\">"+ $(this).closest('option').text() + "</span>" + "<br />";
-        // Introducir que al seleccionar usuario del listado anterior, se seleccione a su vez dicho usuario en el selector de 'Assignar estudiante'
       //}
     });
     $("#members_form #list_of_members_per_issue").html(htmlContent);
@@ -92,10 +113,22 @@
 
   }
 
+  function updateSelectedProjects() {
+    $("select#issue_project_id option").each(function() { this.selected = ""; });
+
+    $("input:checkbox[name='project_ids[]']:checked").each(function() {
+      $("#issue_project_id option[value=" + $(this).val() +"]").prop("selected", true);
+    });
+  }
+
   // Función empleada al pinchar en selección múltiple de miembros/alumnos (todos seleccionados):
   function select_all(event){
     event.preventDefault();
     $("input:checkbox[name='assigned_to_ids[]']").each(function()
+    {
+      $(this).attr("checked","checked");
+    });
+    $("input:checkbox[name='project_ids[]']").each(function()
     {
       $(this).attr("checked","checked");
     });
@@ -104,20 +137,33 @@
   // Función empleada al pinchar en deselección múltiple de miembros/alumnos (ninguno seleccionado):
   function select_none(event){
     event.preventDefault();
-    $("input:checkbox[name='assigned_to_ids[]']:checked:not(.inactive)").each(function()
+    $("input:checkbox[name='assigned_to_ids[]']").each(function()
+    {
+      $(this).attr("checked",false);
+    });
+    $("input:checkbox[name='project_ids[]']").each(function()
     {
       $(this).attr("checked",false);
     });
   }
 
   // Función empleada al seleccionar algún miembro/alumno
-  function select_from_custom_field(event, id) {
+  function select_from_custom_field(event) {
     event.preventDefault();
-    select_none(event);
-    $("input:checkbox[name='assigned_to_ids[]']:checkbox[data-"+id+"='"+ $("#select_" + id).val() +"']").each(function()
-    {
-      $(this).attr("checked","checked");
-    });
+    //select_none(event);
+
+    var checkedUsers = $("input:checkbox[name='assigned_to_ids[]']");
+    var checkedProjects = $("input:checkbox[name='project_ids[]']");
+
+    for(var i = 0, len = checkedUsers.length; i < len; i++) {
+        if(checkedUsers[i].checked){
+          checkedProjects[i].checked = true;
+        } else {
+          checkedProjects[i].checked = false;
+          checkedProjects[0].checked = true;
+        }
+    }
+
     $(".select_box_custom_field_value").prop('selectedIndex',0);
   }
 
