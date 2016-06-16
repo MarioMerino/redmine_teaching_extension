@@ -35,7 +35,7 @@ module IssuesHelper
       #s << "<option value=#{principal.id}>#{ check_box_tag name, principal.id, false, :id => nil } #{h principal.name}</option>\n"
       selected_attribute = 'selected="selected"' if option_value_selected?(principal, selected) || principal.id.to_s == selected
       s << %(<option value="#{principal.id}"#{selected_attribute}>#{check_box_tag name, principal.id, @issue != nil && allowed_members.include?(principal),
-                     :class => ("inactive" unless allowed_members.include?(principal)), data: custom_fields_data, :onchange => "select_from_custom_field(event);"} #{h principal.name} </option>)
+                     :class => ("inactive" unless allowed_members.include?(principal)), data: custom_fields_data} #{h principal.name} </option>) #, :onchange => "select_from_custom_field(event);"
     end
     s.html_safe
   end

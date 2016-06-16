@@ -2,16 +2,16 @@
    other_projects = 0
    visible_projects = 0
    issue_projects = [@issue.project] | @issue.projects
-   allowed_members_projects = @issue.assignable_users_subprojects #@issue.allowed_target_projects & @issue.project.descendants
+   allowed_projects = @issue.allowed_target_projects & @issue.project.descendants #@issue.assignable_users_subprojects
 %>
 <!-- Sección del listado de alumnos/subproyectos de la asignatura -->
-<span id="my_members_per_issue">
-  <span id="list_of_members_per_issue">
+<span id="my_projects_per_issue">
+  <span id="list_of_projects_per_issue">
     <% issue_projects.each do |user| %>
-      <% if allowed_members_projects.include?(user) %>
+      <% if allowed_projects.include?(user) %>
             <!-- Modificar para que solo muestre el subproyecto asignado al usuario actual (current). De no poder solucionarlo,
              eliminar esta sección y, simplemente, dotar de permisos de edición y borrado al miembro de dicho subproyecto... -->
-        <%= content_tag("span", user.name.gsub(/ /,"&nbsp;").html_safe, class: "list_users_names") %>
+        <%= content_tag("span", user.name.gsub(/ /,"&nbsp;").html_safe, class: "list_projects_names") %>
         <% visible_projects += 1 %>
       <% else %>
         <% other_projects += 1 %>

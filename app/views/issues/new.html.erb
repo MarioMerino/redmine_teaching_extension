@@ -11,26 +11,22 @@
       <div id="all_attributes">
         <%= render :partial => 'issues/form', :locals => {:f => f} %>
       </div>
-      <!-- Listado de miembros seleccionados para propagarles issue: -->
-      <div class="splitcontentteaching">
-        <div class="splitcontentteachingleft">
-          <% if @issue.safe_attribute? 'assigned_to_id' %>
-            <% select_options = principals_options_for_selection(@issue.assignable_users_subprojects, @issue.assigned_to) %>
-            <p id="members_form">
-              <%= f.select :assigned_to_id, select_options, {:required => @issue.required_attribute?('assigned_to_id'), :include_blank => true, :label => l('assigned_students')},
-                  {:multiple => true, style: "display:none;"} %>
-              <%= render 'projects_students_list' %>
-            </p>
 
-            <p style="display: none">
-              <% select_options = project_tree_options_for_select([@issue.project] | @issue.project.descendants, :selected => @issue.project) %>
-              <%= f.select :project_id, select_options, {:required => false, :include_blank => true},
-                           :onchange => "updateIssueFrom('#{escape_javascript project_issue_form_path(@project, :id => @issue, :format => 'js')}')" %>
-            </p>
-          <% end %>
-
-        </div>
-      </div>
+      <%# if @issue.safe_attribute? 'assigned_to_id' %>
+      <%# select_options = principals_options_for_selection(@issue.assignable_users_subprojects, @issue.assigned_to) %>
+      <!--p id="members_form" style="display: none">
+        <%#= f.select :assigned_to_id, select_options, {:required => @issue.required_attribute?('assigned_to_id'), :include_blank => true, :label => l('assigned_students')},
+                     {:multiple => false, style: "display:none;"} %>
+        <%#= render 'projects_students_list' %>
+      </p-->
+      <%# end %>
+      <!-- Listado de subproyectos seleccionados para llevar a cabo la propagacion de la issue: -->
+      <p id="projects_form">
+        <% select_options = project_tree_options_for_select([@issue.project] | @issue.project.descendants, :selected => @issue.project) %>
+        <%= f.select :project_id, select_options, {:required => false, :include_blank => true}, :multiple => false,
+                     :onchange => "updateIssueFrom('#{escape_javascript project_issue_form_path(@project, :id => @issue, :format => 'js')}')" %>
+        <%= render 'projects_students_list' %>
+      </p>
 
       <% if @copy_from && @copy_from.attachments.any? %>
           <p>
@@ -61,26 +57,28 @@
           </p>
       <% end %>
     </div>
-
     <%= submit_tag l(:button_create) %>
     <%= submit_tag l(:button_create_and_continue), :name => 'continue' %>
     <%= preview_link preview_new_issue_path(:project_id => @project), 'issue-form' %>
     <!-- Enlace para abrir la ventana de diálogo (showModal()) donde se mostrará la selección de proyectos  -->
     <!-- Se genera la ruta de la issue en cuestión (...selection_path(id)) al pinchar en el enlace, para identificar sobre qué proyecto se está operando:  -->
-    <% if @issue.project.descendants.any? && User.current.admin %>
+    <% if @issue.project.descendants.any? %>
+        <!-- HABILITAR QUE 'PROHIBIDO PULSAR BOTÓN DE PROPAGAR' SI NO SE HAN RELLENADO LOS CAMPOS OBLIGATORIOS DEL FORMULARIO: -->
       <%= link_to l("button_propagate"), plugin_teaching_extension_load_students_selection_path(:issue_id => @issue.id, :project_id => @issue.project.id), remote: true, id: "loadModalStudentsSelection", class: "load-modal-students-selection" %>
-      <%#= link_to l("button_create_propagate"), '#', :onclick => 'showModal("ajax-modal", "1000px");$("#button_apply_projects").focus();' %>
     <% end %>
+    <!-- Probar a crear un :button_create alternativo, el cual se habilite solo y cuando se lleve a cabo la asignacion de propagacion de subproyectos: -->
+    <span id="propagate">
+    </span>
 <% end %>
 
 <script>
   $("#loadModalStudentsSelection").click(function(e) {
-    var ids = $('#issue_assigned_to_id').val();
+    var ids = $('#issue_project_id').val();
     if(ids==null) {
       ids='';
     }
     var sep = ($(this).attr('href').indexOf('?') != -1) ? '&' : '?';
-    $(this).attr('href', $(this).attr('href') + sep + 'assigned_to_ids=' + ids );
+    $(this).attr('href', $(this).attr('href') + sep + 'project_ids=' + ids );
   });
 </script>
 

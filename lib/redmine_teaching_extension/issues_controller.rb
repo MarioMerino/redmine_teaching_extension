@@ -17,6 +17,34 @@ class IssuesController
     @issue.project = @project
   end
 
+  # MODIFICAR PARA PODER CREAR ISSUE DESDE 'PROPAGATE ISSUE TO SUBPROJECTS...'
+  def create
+    call_hook(:controller_issues_new_before_save, { :params => params, :issue => @issue })
+    @issue.save_attachments(params[:attachments] || (params[:issue] && params[:issue][:uploads]))
+    if @issue.save
+      call_hook(:controller_issues_new_after_save, { :params => params, :issue => @issue})
+      respond_to do |format|
+        format.html {
+          render_attachment_warning_if_needed(@issue)
+          flash[:notice] = l(:notice_issue_successful_create, :id => view_context.link_to("##{@issue.id}", issue_path(@issue), :title => @issue.subject))
+          if params[:continue]
+            attrs = {:tracker_id => @issue.tracker, :parent_issue_id => @issue.parent_issue_id}.reject {|k,v| v.nil?}
+            redirect_to new_project_issue_path(@issue.project, :issue => attrs)
+          else
+            redirect_to issue_path(@issue)
+          end
+        }
+        format.api  { render :action => 'show', :status => :created, :location => issue_url(@issue) }
+      end
+      return
+    else
+      respond_to do |format|
+        format.html { render :action => 'new' }
+        format.api  { render_validation_errors(@issue) }
+      end
+    end
+  end
+
   #def allow_target_projects
   #  if User.current.allowed_to?(:add_issues, @projects)
   #    @allowed_projects = Issue.allowed_target_projects

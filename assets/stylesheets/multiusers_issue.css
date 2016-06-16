@@ -1,4 +1,4 @@
-.list_users_names{
+.list_projects_names {
     padding: 2px 4px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -8,20 +8,20 @@
     line-height: 24px;
 }
 
-a.list_users_names.hover{
+a.list_projects_names.hover {
     color: #ffffff;
     background-color: darkgrey;
     text-decoration: none;
     border: 1px solid darkgrey;
 }
 
-a.list_users_names.current{
+a.list_projects_names.current {
     color: #ffffff;
     background-color: #707070;
     border: 1px solid #707070;
 }
 
-#label_assigned_students{
+#label_assigned_students {
     font-family: Verdana, sans-serif;
     color: #484848;
     width: 22%;
@@ -37,29 +37,25 @@ a.list_users_names.current{
     border-bottom: 1px solid #d3d3d3;
 }
 
-#users_list.columns {
-    padding-bottom: 10px;
-}
-
-#users_list option.inactive {
-    color: #d3d3d3;
-}
-
 #project_list.columns {
     padding-bottom: 10px;
 }
 
-#project_list label.inactive{
+#project_list label.inactive {
     color: #d3d3d3;
 }
 
-.splitcontentteaching {overflow:auto;}
+#my_projects_per_issue{
+    max-height: 150px;
+    overflow: auto;
+    display: flex;
+    width: 77%;
+}
 
-.splitcontentteachingleft{float:left; width:49%;}
-
-#members_form{
+#projects_form #my_projects_per_issue{
     width: auto;
 }
+
 /* En principio, no se usará (sólo afecta en caso de mostrar peticiones en 'show.html.erb')
 td.project .disabled_project{
     color: #808080;
@@ -70,7 +66,7 @@ tr:hover td.project .disabled_project, tr.context-menu-selection td.project .dis
     color: inherit;
 }
 */
-.hide_journal_details{
+.hide_journal_details {
     display: none;
     margin-right: 5px;
 }
