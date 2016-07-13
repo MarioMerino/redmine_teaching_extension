@@ -6,6 +6,7 @@
                       :html => {:id => 'issue-form', :multipart => true} do |f| %>
     <%= error_messages_for 'issue' %>
     <%= hidden_field_tag 'copy_from', params[:copy_from] if params[:copy_from] %>
+    <%#= hidden_field_tag 'copy_from_subprojects', params[:copy_from_subprojects] if params[:copy_from_subprojects] %>
 
     <div class="box tabular">
       <div id="all_attributes">
@@ -21,12 +22,14 @@
       </p-->
       <%# end %>
       <!-- Listado de subproyectos seleccionados para llevar a cabo la propagacion de la issue: -->
-      <p id="projects_form">
-        <% select_options = project_tree_options_for_select([@issue.project] | @issue.project.descendants, :selected => @issue.project) %>
-        <%= f.select :project_id, select_options, {:required => false, :include_blank => true}, :multiple => false,
-                     :onchange => "updateIssueFrom('#{escape_javascript project_issue_form_path(@project, :id => @issue, :format => 'js')}')" %>
-        <%= render 'projects_students_list' %>
-      </p>
+      <!-- MOSTRAR SELECT DE SUBPROYECTOS SÓLO EN LA VENTANA NEW (EN COPY, ¡NO!) -->
+      <% if !@copy_from #&& !@copy_from_subprojects %>
+        <p id="projects_form">
+          <% select_options = project_tree_options_for_select([@issue.project] | @issue.project.descendants, :selected => @issue.project) %>
+          <%= f.select :project_id, select_options, {:required => false, :include_blank => true, :label => l("propagation_subprojects")}, :multiple => false %>
+          <%= render 'projects_students_list' %>
+        </p>
+      <% end %>
 
       <% if @copy_from && @copy_from.attachments.any? %>
           <p>
@@ -40,6 +43,19 @@
             <%= check_box_tag 'copy_subtasks', '1', @copy_subtasks %>
           </p>
       <% end %>
+
+      <%# if @copy_from_subprojects && @copy_from_subprojects.attachments.any? %>
+          <!--p>
+            <label for="copy_attachments"><%= l(:label_copy_attachments) %></label>
+            <%#= check_box_tag 'copy_attachments', '1', @copy_attachments %>
+          </p>
+      <%# end %>
+      <%# if @copy_from_subprojects && !@copy_from_subprojects.leaf? %>
+          <p>
+            <label for="copy_subtasks"><%= l(:label_copy_subtasks) %></label>
+            <%#= check_box_tag 'copy_subtasks', '1', @copy_subtasks %>
+          </p-->
+      <%# end %>
 
       <p id="attachments_form"><label><%= l(:label_attachment_plural) %></label><%= render :partial => 'attachments/form', :locals => {:container => @issue} %></p>
 
@@ -62,12 +78,16 @@
     <%= preview_link preview_new_issue_path(:project_id => @project), 'issue-form' %>
     <!-- Enlace para abrir la ventana de diálogo (showModal()) donde se mostrará la selección de proyectos  -->
     <!-- Se genera la ruta de la issue en cuestión (...selection_path(id)) al pinchar en el enlace, para identificar sobre qué proyecto se está operando:  -->
-    <% if @issue.project.descendants.any? %>
+    <% if @issue.project.descendants.any? && !@copy_from #&& !@copy_from_subprojects %>
         <!-- HABILITAR QUE 'PROHIBIDO PULSAR BOTÓN DE PROPAGAR' SI NO SE HAN RELLENADO LOS CAMPOS OBLIGATORIOS DEL FORMULARIO: -->
       <%= link_to l("button_propagate"), plugin_teaching_extension_load_students_selection_path(:issue_id => @issue.id, :project_id => @issue.project.id), remote: true, id: "loadModalStudentsSelection", class: "load-modal-students-selection" %>
     <% end %>
-    <!-- Probar a crear un :button_create alternativo, el cual se habilite solo y cuando se lleve a cabo la asignacion de propagacion de subproyectos: -->
+    <!-- :button_create alternativo, el cual se habilita solo y cuando se lleve a cabo la asignacion de propagacion de subproyectos: -->
+    <!-- OCULTAR EL BOTÓN DE PROPAGAR (SI EL PROYECTO SELECCIONADO NO CONTIENE SUBPROYECTOS O SI EL PROYECTO SELECCIONADO ES UN SUBPROYECTO) -->
     <span id="propagate">
+      <% if @copy_from && @copy_from.project.descendants.any? %>
+          <%= submit_tag l(:button_create_propagation), :name => 'propagate' %> <!-- :name => 'propagate' (al pulsar, propaga la issue a subproyectos) -->
+      <% end %>
     </span>
 <% end %>
 
@@ -80,6 +100,7 @@
     var sep = ($(this).attr('href').indexOf('?') != -1) ? '&' : '?';
     $(this).attr('href', $(this).attr('href') + sep + 'project_ids=' + ids );
   });
+
 </script>
 
 <div id="preview" class="wiki"></div>

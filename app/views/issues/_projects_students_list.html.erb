@@ -7,11 +7,11 @@
 <!-- Sección del listado de alumnos/subproyectos de la asignatura -->
 <span id="my_projects_per_issue">
   <span id="list_of_projects_per_issue">
-    <% issue_projects.each do |user| %>
-      <% if allowed_projects.include?(user) %>
+    <% issue_projects.each do |project| %>
+      <% if allowed_projects.include?(project) %>
             <!-- Modificar para que solo muestre el subproyecto asignado al usuario actual (current). De no poder solucionarlo,
              eliminar esta sección y, simplemente, dotar de permisos de edición y borrado al miembro de dicho subproyecto... -->
-        <%= content_tag("span", user.name.gsub(/ /,"&nbsp;").html_safe, class: "list_projects_names") %>
+        <%= content_tag("span", project.name.gsub(/ /,"&nbsp;").html_safe, class: "list_projects_names") %>
         <% visible_projects += 1 %>
       <% else %>
         <% other_projects += 1 %>

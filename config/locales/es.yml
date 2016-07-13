@@ -1,9 +1,14 @@
 # Spanish strings go here for Rails i18n
 es:
   button_propagate: "Propagar petición a subproyectos..."
-  button_create_propagation: "Crear y propagar"
+  button_create_propagation: "Propagar"
+  click: "* Pulsar"
+  propagate_issue: "para propagar la petición"
+  subprojects: ""
+  subprojects_es: "a los subproyectos de"
   Selection: "Seleccionar"
   field_projects: "Subprojectos de la asignatura"
+  propagation_subprojects: "Asignado a subproyectos"
   select_none: "Ninguno"
   select_all: "Todos"
   other: "otro"

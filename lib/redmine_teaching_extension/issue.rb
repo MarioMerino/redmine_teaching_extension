@@ -17,6 +17,7 @@ class Issue
   end
 
   # Usuarios de los subproyectos del proyecto principal, al que se le puede asignar la Issue
+=begin
   def assignable_users_subprojects
     subprojects = Project.where(:parent_id => project)
     subproject_members = []
@@ -28,7 +29,33 @@ class Issue
     users << assigned_to if assigned_to
     users.uniq.sort
   end
+=end
 
+  # Copies attributes from another issue, arg can be an id or an Issue
+=begin
+  def copy_from_subprojects(arg, options={})
+    issue = arg.is_a?(Issue) ? arg : Issue.visible.find(arg)
+    self.attributes = issue.attributes.dup.except("id", "root_id", "parent_id", "lft", "rgt", "created_on", "updated_on")
+    self.custom_field_values = issue.custom_field_values.inject({}) {|h,v| h[v.custom_field_id] = v.value; h}
+    self.status = issue.status
+    self.author = User.current
+    unless options[:attachments] == false
+      self.attachments = issue.attachments.map do |attachement|
+        attachement.copyy(:container => self)
+      end
+    end
+    @copied_from = issue
+    @copy_options = options
+    self
+  end
+
+  # Returns an unsaved copy of the issue
+  def copyy(attributes=nil, copy_options={})
+    copy = self.class.new.copy_from_subprojects(self, copy_options)
+    copy.attributes = attributes if attributes
+    copy
+  end
+=end
 
   # Devuelve true si el usuario del sistema ó usuario actual tiene permiso para ver la issue
   # (nueva implementación del método 'visible?' existente en models/issue.rb)
@@ -93,53 +120,6 @@ class Issue
       notified = notified | pr.notified_users
     end
     notified
-  end
-
-end
-
-require_dependency 'issues_helper'
-
-module IssuesHelper
-
-  alias_method :principal_show_detail, :show_detail
-
-  # Función que devuelve la representación textual de los detalles del journal (histórico de la issue)
-  def show_detail(detail, no_html=false, options={})
-
-    if detail.property == 'projects'
-      value = detail.value
-      old_value = detail.old_value
-
-      if value.present?
-        value = value.split(',')
-        list = content_tag("span", h(value.join(', ')), class: "journal_projects_details",
-                           data: {detail_id: detail.id}, style: value.size>1 ? "display:none;":"")
-        link = link_to l(:label_details).downcase, "#", class: "show_journal_details",
-                       data: {detail_id: detail.id} if value.size>1
-        linkHide = link_to l(:label_hide_details).downcase, "#", class: "hide_journal_details",
-                           data: {detail_id: detail.id} if value.size>1
-
-        details = "(#{link}#{linkHide}#{list})" unless no_html
-
-        "#{value.size} #{value.size>1 ? l(:text_journal_projects_added) : l(:text_journal_project_added)} #{details}".html_safe
-
-      elsif old_value.present?
-        old_value = old_value.split(',')
-        list = content_tag("del", h(old_value.join(', ')), class: "journal_projects_details",
-                           data: {detail_id: detail.id}, style: old_value.size>1 ? "display:none;":"")
-        link = link_to l(:label_details).downcase, "#", class: "show_journal_details",
-                       data: {detail_id: detail.id} if old_value.size>1
-        linkHide = link_to l(:label_hide_details).downcase, "#", class: "hide_journal_details",
-                           data: {detail_id: detail.id} if old_value.size>1
-
-        details = "(#{link}#{linkHide}#{list})" unless no_html
-
-        "#{old_value.size} #{old_value.size>1 ? l(:text_journal_projects_deleted) : l(:text_journal_project_deleted)} #{details}".html_safe
-
-      end
-    else
-      principal_show_detail(detail, no_html, options)
-    end
   end
 
 end

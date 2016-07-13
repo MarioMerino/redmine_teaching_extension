@@ -45,16 +45,20 @@ a.list_projects_names.current {
     color: #d3d3d3;
 }
 
-#my_projects_per_issue{
+#my_projects_per_issue {
     max-height: 150px;
     overflow: auto;
     display: flex;
     width: 77%;
 }
 
-#projects_form #my_projects_per_issue{
+#projects_form #my_projects_per_issue {
     width: auto;
 }
+
+/*#propagate {
+    display: inline;
+}*/
 
 /* En principio, no se usará (sólo afecta en caso de mostrar peticiones en 'show.html.erb')
 td.project .disabled_project{

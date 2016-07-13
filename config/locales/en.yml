@@ -1,9 +1,14 @@
 # English strings go here for Rails i18n
 en:
   button_propagate: "Propagate issue to subprojects..."
-  button_create_propagation: "Create and propagate"
+  button_create_propagation: "Propagate"
+  click: "* Click"
+  propagate_issue: "to propagate the issue to"
+  subprojects: "subprojects"
+  subprojects_es: ""
   Selection: "Select"
   field_projects: "Subprojects of the subject"
+  propagation_subprojects: "Assignee subprojects"
   select_none: "None"
   select_all: "All"
   other: "other"

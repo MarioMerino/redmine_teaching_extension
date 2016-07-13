@@ -18,8 +18,8 @@
    # Función para cargar correctamente la selección de miembros/estudiantes implicados...
    #users_list = principals_check_box_propagation('assigned_to_ids[]', @issue.assignable_users_subprojects, @issue.assigned_to)
 
-   # Función para cargar correctamente la selección de subproyectos implicados...
-   nested_projects_list = render_project_nested_lists(allowed_projects|issue_projects) do |project|
+   # Función para cargar correctamente la selección de subproyectos implicados....
+   nested_projects_list = render_subproject_nested_lists(allowed_projects|issue_projects) do |project|
      custom_fields_data = {}
      if allowed_projects.include?(project)
        custom_fields.each do |f|
@@ -35,12 +35,11 @@
                  check_box_tag(
                      'project_ids[]',
                      project.id,
-                     @issue != nil && allowed_projects.include?(project) && issue_projects.include?(project),
+                     @issue != nil && issue_projects.include?(project) && allowed_projects.include?(project),
                      disabled: allowed_projects.include?(project) ? false : true,
-                     selected: true,
                      #:class => ("inactive" unless allowed_projects.include?(project)),
                      data: custom_fields_data
-                 ) + ' ' + h(project.name), :class => ("inactive" unless allowed_projects.include?(project))
+                 ) + ' ' + h(project.name), :class => ("inactive" unless allowed_projects.include?(project)), :style => ("display:none;" unless allowed_projects.include?(project))
      )
    end
 %>
@@ -99,9 +98,11 @@ LOS SUBPROYECTOS DEL PROYECTO ACTUAL (CREAR Y PROPAGAR ISSUE) -->
     // Cada subproyecto seleccionado, es mostrado en la vista de 'New issue' con el siguiente formato html:
     var htmlContent = "";
     $("input:checkbox[name='project_ids[]']:checked").each(function() {
-      //if($(this).val() != <%#= @issue.project.id %>){
-      htmlContent += "<span class=\"list_projects_names\">"+ $(this).closest('label').text() + "</span>" + "<br />";
-      //}
+      if($(this).val() != <%= @issue.project.id %>){
+        htmlContent += "<span class=\"list_projects_names\">" + $(this).closest('label').text() + "</span>" + "<br />";
+      } else {
+        htmlContent += "<span class=\"list_projects_names\" style='display: none'>" + $(this).closest('label').text() + "</span>";
+      }
     });
 
     $("#projects_form #list_of_projects_per_issue").html(htmlContent);
@@ -110,9 +111,17 @@ LOS SUBPROYECTOS DEL PROYECTO ACTUAL (CREAR Y PROPAGAR ISSUE) -->
       $("#propagate").css("display", "none");
     } else {
       $("#propagate").css("display", "inline");
-      $("#propagate").html('<%= escape_javascript submit_tag l(:button_create_propagation) %>');
-    }
+      $('input[value="Create"]').prop('disabled', true);
+      //$('input[value="Create and continue"]').prop('disabled', true);
+      //$("#propagate").html('<%#= escape_javascript submit_tag l(:button_create_propagation), :name => 'continue' %>');
+      //$('input[value="Create and continue"]').prop('disabled', true);
 
+      /*for (var i = 0, len = htmlContent.length; i < len; i++) {
+        if ($("#propagate").html('<%#= escape_javascript submit_tag l(:button_create_propagation) %>').click()) {
+          updateIssueFrom('<%#= escape_javascript project_issue_form_path(@project, :id => @issue, :format => 'js') %>');
+        }
+      }*/
+    }
   }
 
   // Función empleada al pinchar en selección múltiple de subproyectos (todos seleccionados):

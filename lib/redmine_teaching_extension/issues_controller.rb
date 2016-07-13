@@ -2,8 +2,12 @@ require_dependency 'issues_controller'
 
 class IssuesController
 
+  menu_item :new_issue, :only => [:new, :create]
+
   before_filter :authorize, :except => [:index, :load_students_selection, :show] #:allow_target_projects] # Autorizar al usuario para realizar todas las acciones, excepto 'index', 'load_students_selection' y 'show'
   before_filter :set_project, :only => [:load_students_selection] # Establecer un proyecto para ser cargado, sólo para la accion 'load_students_selection'
+  #before_filter :build_new_issue_from_params, :only => [:new, :create]
+  #before_filter :build_new_issue_subprojects_from_params, :only => [:new, :create]
   #append_before_filter :set_members, :only => [:create, :update]
 
   # Función de carga de usuarios a partir de una issue:
@@ -17,10 +21,18 @@ class IssuesController
     @issue.project = @project
   end
 
-  # MODIFICAR PARA PODER CREAR ISSUE DESDE 'PROPAGATE ISSUE TO SUBPROJECTS...'
+  # Add a new issue
+  # The new issue will be created from an existing one if copy_from parameter is given
+  def new
+    respond_to do |format|
+      format.html { render :action => 'new', :layout => !request.xhr? }
+    end
+  end
+
   def create
     call_hook(:controller_issues_new_before_save, { :params => params, :issue => @issue })
     @issue.save_attachments(params[:attachments] || (params[:issue] && params[:issue][:uploads]))
+
     if @issue.save
       call_hook(:controller_issues_new_after_save, { :params => params, :issue => @issue})
       respond_to do |format|
@@ -29,7 +41,16 @@ class IssuesController
           flash[:notice] = l(:notice_issue_successful_create, :id => view_context.link_to("##{@issue.id}", issue_path(@issue), :title => @issue.subject))
           if params[:continue]
             attrs = {:tracker_id => @issue.tracker, :parent_issue_id => @issue.parent_issue_id}.reject {|k,v| v.nil?}
-            redirect_to new_project_issue_path(@issue.project, :issue => attrs)
+            if @issue.project.parent_id
+              # Crear bucle de propagación de la issue creada entre subproyectos ...
+              redirect_to new_project_issue_path(@issue.project.parent_id, :issue => attrs)
+            else
+              #redirect_to new_project_issue_path(@issue.project, :issue => attrs)
+              redirect_to project_copy_issue_path(@project, @issue)
+              # Crear bucle de propagación de la issue creada entre subproyectos ...
+            end
+          #elsif params[:propagate]
+            # REDIRECCIONAR A copy_from, Y PROPAGACION DE ISSUE REALIZADA A TODOS LOS SUBPROYECTOS DEL PROYECTO ACTUAL...
           else
             redirect_to issue_path(@issue)
           end
@@ -45,29 +66,86 @@ class IssuesController
     end
   end
 
-  #def allow_target_projects
-  #  if User.current.allowed_to?(:add_issues, @projects)
-  #    @allowed_projects = Issue.allowed_target_projects
-  #    if params[:issue]
-  #      @target_project = @allowed_projects.detect {|p| p.id.to_s == params[:issue][:project_id].to_s}
-  #      if @target_project
-  #        target_projects = [@target_project]
-  #      end
-  #    end
-  #  end
-  #  target_projects ||= @projects
+=begin
+  def build_new_issue_from_params
+    if params[:id].blank?
+      @issue = Issue.new
+      if params[:copy_from]
+        begin
+          @copy_from = Issue.visible.find(params[:copy_from])
+          @copy_attachments = params[:copy_attachments].present? || request.get?
+          @copy_subtasks = params[:copy_subtasks].present? || request.get?
+          @issue.copy_from(@copy_from, :attachments => @copy_attachments, :subtasks => @copy_subtasks)
+        rescue ActiveRecord::RecordNotFound
+          render_404
+          return
+        end
+      end
+      @issue.project = @project
+    else
+      @issue = @project.issues.visible.find(params[:id])
+    end
 
-  #  @custom_fields = target_projects.map{|p|p.all_issue_custom_fields.visible}.reduce(:&)
-  #  @assignables = target_projects.map(&:assignable_users).reduce(:&)
-  #  @trackers = target_projects.map(&:trackers).reduce(:&)
-  #  @versions = target_projects.map {|p| p.shared_versions.open}.reduce(:&)
-  #  @categories = target_projects.map {|p| p.issue_categories}.reduce(:&)
+    @issue.project = @project
+    @issue.author ||= User.current
+    # Tracker must be set before custom field values
+    @issue.tracker ||= @project.trackers.find((params[:issue] && params[:issue][:tracker_id]) || params[:tracker_id] || :first)
+    if @issue.tracker.nil?
+      render_error l(:error_no_tracker_in_project)
+      return false
+    end
+    @issue.start_date ||= Date.today if Setting.default_issue_start_date_to_creation_date?
+    @issue.safe_attributes = params[:issue]
 
-  #  @safe_attributes = @issues.map(&:safe_attribute_names).reduce(:&)
+    @priorities = IssuePriority.active
+    @allowed_statuses = @issue.new_statuses_allowed_to(User.current, @issue.new_record?)
+    @available_watchers = @issue.watcher_users
+    if @issue.project.users.count <= 20
+      @available_watchers = (@available_watchers + @issue.project.users.sort).uniq
+    end
+  end
+=end
 
-  #  @issue_params = params[:issue] || {}
-  #  @issue_params[:custom_field_values] ||= {}
-  #end
+=begin
+    def build_new_issue_subprojects_from_params
+      if params[:id].blank?
+        @issue = Issue.new
+        if params[:copy_from_subprojects]
+          begin
+            @copy_from_subprojects = Issue.visible.find(params[:copy_from_subprojects])
+            @copy_attachments = params[:copy_attachments].present? || request.get?
+            @copy_subtasks = params[:copy_subtasks].present? || request.get?
+            @issue.copy_from_subprojects(@copy_from_subprojects, :attachments => @copy_attachments, :subtasks => @copy_subtasks)
+          rescue ActiveRecord::RecordNotFound
+            render_404
+            return
+          end
+        end
+        @issue.project = @project
+      else
+        @issue = @project.issues.visible.find(params[:id])
+      end
+      #@issue.project.descendants.each do |subproject|
+      @issue.project = @project
+      @issue.author ||= User.current
+      # Tracker must be set before custom field values
+      @issue.tracker ||= @project.trackers.find((params[:issue] && params[:issue][:tracker_id]) || params[:tracker_id] || :first)
+      if @issue.tracker.nil?
+        render_error l(:error_no_tracker_in_project)
+        return false
+      end
+      @issue.start_date ||= Date.today if Setting.default_issue_start_date_to_creation_date?
+      @issue.safe_attributes = params[:issue]
+
+      @priorities = IssuePriority.active
+      @allowed_statuses = @issue.new_statuses_allowed_to(User.current, @issue.new_record?)
+      @available_watchers = @issue.watcher_users
+      if @issue.project.users.count <= 20
+        @available_watchers = (@available_watchers + @issue.project.users.sort).uniq
+      end
+      #end
+    end
+=end
 
   private
     # Se establece el listado de miembros que se va a cargar para aplicarles la propagación de issues:
@@ -79,14 +157,7 @@ class IssuesController
       @subprojects.each do |subproject|
         @subproject_members += Principal.member_of(subproject)
       end
-      #if params[:issue] && params[:issue][:project_ids]
-      #  params[:issue][:project_ids].reject!(&:blank?)
-      #  if params[:issue][:project_ids].present?
-      #    Project.find(params[:issue][:project_ids]).each do |p|
-      #      @projects << p
-      #    end
-      #  end
-      #end
+
       @users = @subproject_members
       @users << Issue.find(params[:author_id]) if params[:author_id]
       @users << Issue.find(params[:assigned_to_id]) if params[:assigned_to_id]
@@ -94,22 +165,6 @@ class IssuesController
       #@projects.uniq!
       #@issue.projects = @projects
     end
-
-    # Se actualiza el histórico de la issue propagada a los proyectos en cuestión:
-    #def update_project_journal
-    #  @current_journal = @issue.init_journal(User.current) # Se asocia el histórico actual al usuario actual.
-    #  @projects_before_change = @issue.projects # Se declara la situación previa a cualquier actualización del histórico.
-
-      # Se añade en el histórico actual, el registro de la situación actual del mismo (antes de actualizar)
-    #  @current_journal.details << JournalDetail.new(:property => 'projects',
-    #                                                :old_value => (@projects_before_change - @projects).reject(&:blank?),
-    #                                                :value => nil) if (@projects_before_change - @projects).present?
-
-      # Se añade en el histórico actual, el registro actualizado del histórico (una vez realizado los cambios pertinentes)
-    #  @current_journal.details << JournalDetail.new(:property => 'projects',
-    #                                                :old_value => nil,
-    #                                                :value => (@projects - @projects_before_change).reject(&:blank?).join(",")) if (@projects - @projects_before_change).present?
-    #end
 
     # Se establece un proyecto en concreto para ser cargado y propagarle la issue en cuestión:
     def set_project

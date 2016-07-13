@@ -6,11 +6,26 @@
   <%= f.check_box :is_private, :no_label => true %><label class="inline" for="issue_is_private" id="issue_is_private_label"><%= l(:field_is_private) %></label>
 </p>
 <% end %>
-
+<!-- MOSTRAR SI EL PROYECTO DE LA ISSUE A COPIAR, NO TIENE SUBPROYECTOS... (SI !@issue.project.descendants.any?) -->
 <% if @issue.safe_attribute? 'project_id' %>
-<p><%= f.select :project_id, project_tree_options_for_select(@issue.allowed_target_projects, :selected => @issue.project), {:required => true},
-                :onchange => "updateIssueFrom('#{escape_javascript project_issue_form_path(@project, :id => @issue, :format => 'js')}')" %></p>
+<p><%= f.select :project_id, project_tree_options_for_select(@issue.allowed_target_projects, :selected => @issue.project),  {:required => true},
+                                              :onchange => "updateIssueFrom('#{escape_javascript project_issue_form_path(@project, :id => @issue, :format => 'js')}');" %>
+  <% if !@issue.project.parent_id %>
+    <%= l(:click) %> <b><%= l(:button_create_propagation) %></b> <%= l(:propagate_issue) %> <%= l(:subprojects_es) %> <b><%= @issue.project %></b> <%= l(:subprojects) %>
+  <% end %>
+</p>
 <% end %>
+
+<script type="text/javascript">
+  var name = "»";
+  $("select#issue_project_id option").click(function() {
+      if(this.text.indexOf(name) >= 1) {
+        $("#propagate").css("display", "none");
+      } else {
+        $("#propagate").css("display", "inline");
+      }
+    });
+</script>
 
 <% if @issue.safe_attribute? 'tracker_id' %>
 <p><%= f.select :tracker_id, @issue.project.trackers.collect {|t| [t.name, t.id]}, {:required => true},
