@@ -2,6 +2,7 @@
 en:
   button_propagate: "Propagate issue to subprojects..."
   button_create_propagation: "Propagate"
+  button_create_and_propagate: "Create and propagate"
   click: "* Click"
   propagate_issue: "to propagate the issue to"
   subprojects: "subprojects"

@@ -85,42 +85,53 @@ LOS SUBPROYECTOS DEL PROYECTO ACTUAL (CREAR Y PROPAGAR ISSUE) -->
 
 <script type="text/javascript">
 
+  $("input:checkbox[name='project_ids[]']").change(function() {
+    if($("input:checkbox[name='project_ids[]']:checked").length == 1) {
+      $("input:checkbox:not(:checked)").prop('disabled', true);
+    } else {
+      $("input:checkbox:not(:checked)").prop('disabled', false);
+    }
+  });
+
   // Función aplicada al seleccionar y/o actualizar algun miembro del listado de miembros/estudiantes:
   function updateSelectedProjects() {
 
     // Se obtienen todas las opciones de la seleccion de miembros, pasando el ID de los miembros:
-    $("select#issue_project_id option").each(function() { this.selected = ""; });
+    $("select#issue_project_id option").each(function() {
+      this.selected = "";
+    });
 
     // Para cada uno de los checkbox de subproyectos que es seleccionado, se obtiene el valor de sus respectivos IDs...:
     $("input:checkbox[name='project_ids[]']:checked").each(function() {
       $("#issue_project_id option[value=" + $(this).val() +"]").prop("selected", true);
     });
     // Cada subproyecto seleccionado, es mostrado en la vista de 'New issue' con el siguiente formato html:
-    var htmlContent = "";
+    var htmlContent = [];
     $("input:checkbox[name='project_ids[]']:checked").each(function() {
       if($(this).val() != <%= @issue.project.id %>){
-        htmlContent += "<span class=\"list_projects_names\">" + $(this).closest('label').text() + "</span>" + "<br />";
+        htmlContent.push("<span class=\"list_projects_names\">" + $(this).closest('label').text() + "</span>" + "<br />");
       } else {
-        htmlContent += "<span class=\"list_projects_names\" style='display: none'>" + $(this).closest('label').text() + "</span>";
+        htmlContent.push("<span class=\"list_projects_names\" style='display: none'>" + $(this).closest('label').text() + "</span>");
       }
     });
 
     $("#projects_form #list_of_projects_per_issue").html(htmlContent);
 
-    if(htmlContent == '') {
+    if(htmlContent == "" || htmlContent.length == 1) {
       $("#propagate").css("display", "none");
-    } else {
+      $('input[value="Create"]').prop('disabled', false);
+      $('input[name="continue_issue"]').toggle(true);
+      $('input[name="continue"]').toggle(false);
+    /*} else {
+      $("#propagate").css("display", "none");
+      $('input[value="Create"]').prop('disabled', false);
+      $('input[name="continue_issue"]').toggle(true);
+      $('input[name="continue"]').toggle(false);*/
+    } else if(htmlContent.length > 1) {
       $("#propagate").css("display", "inline");
       $('input[value="Create"]').prop('disabled', true);
-      //$('input[value="Create and continue"]').prop('disabled', true);
-      //$("#propagate").html('<%#= escape_javascript submit_tag l(:button_create_propagation), :name => 'continue' %>');
-      //$('input[value="Create and continue"]').prop('disabled', true);
-
-      /*for (var i = 0, len = htmlContent.length; i < len; i++) {
-        if ($("#propagate").html('<%#= escape_javascript submit_tag l(:button_create_propagation) %>').click()) {
-          updateIssueFrom('<%#= escape_javascript project_issue_form_path(@project, :id => @issue, :format => 'js') %>');
-        }
-      }*/
+      $('input[name="continue_issue"]').toggle(false);
+      $('input[name="continue"]').toggle(true);
     }
   }
 
@@ -163,9 +174,9 @@ LOS SUBPROYECTOS DEL PROYECTO ACTUAL (CREAR Y PROPAGAR ISSUE) -->
     $(".select_box_custom_field_value").prop('selectedIndex',0);
 
     //var checkedUsers = $("input:checkbox[name='assigned_to_ids[]']");
-    /*var checkedProjects = $("input:checkbox[name='project_ids[]']");
+    //var checkedProjects = $("input:checkbox[name='project_ids[]']");
 
-     for(var i = 0, len = checkedProjects.length; i < len; i++) {
+     /*for(var i = 0, len = checkedProjects.length; i < len; i++) {
      if(checkedProjects[i].checked){
      checkedProjects[i].checked = true;
      } else {

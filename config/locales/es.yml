@@ -2,6 +2,7 @@
 es:
   button_propagate: "Propagar petición a subproyectos..."
   button_create_propagation: "Propagar"
+  button_create_and_propagate: "Crear y propagar"
   click: "* Pulsar"
   propagate_issue: "para propagar la petición"
   subprojects: ""
