@@ -3,7 +3,7 @@ var involved_project_ids = $('#issue_project_id').val();
 if(involved_project_ids==null) {
   involved_project_ids='';
 }
-replaceIssueFormWith('<%= escape_javascript(render :partial => 'form') %>'); // Cambiar partial 'form' al correspondiente en este caso, que sería el contenido de 'new'
+replaceIssueFormWith('<%= escape_javascript(render :partial => 'form') %>');
 
 $('#issue_project_id').val(involved_project_ids);
 

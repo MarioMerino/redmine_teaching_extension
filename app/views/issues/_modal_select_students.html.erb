@@ -15,9 +15,6 @@
      options_for_selects.merge!(field.name.parameterize => []) # parameterize -> reemplaza el nombre completo por parámetros separados por guión, para adaptarlo mejor a una URL. (ejemplo: .../mario-merino)
    end
 
-   # Función para cargar correctamente la selección de miembros/estudiantes implicados...
-   #users_list = principals_check_box_propagation('assigned_to_ids[]', @issue.assignable_users_subprojects, @issue.assigned_to)
-
    # Función para cargar correctamente la selección de subproyectos implicados....
    nested_projects_list = render_subproject_nested_lists(allowed_projects|issue_projects) do |project|
      custom_fields_data = {}
@@ -66,19 +63,14 @@
 </div>
 
 <div class="users_container">
-  <!--div class="columns" id="users_list" style="display: none">
-    <%#= users_list %> <!-- Listado de usuarios a seleccionar -->
-  <!--/div-->
   <div class="columns" id="project_list">
+    <!-- Listado de subproyectos a seleccionar: -->
     <%= nested_projects_list %>
   </div>
 </div>
 <!-- Botón para guardar los cambios de la selección de proyectos para propagar Issue: -->
-<!-- MODIFICAR LA FUNCION DE ESTE BOTON PARA QUE ACTUE COMO 'CREAR' Y 'CREAR Y CONTINUAR' DE LA ISSUE'. UNA VEZ PULSADO
-REDIRECCIONAR A LA 'SHOW.HTML.ERB' DE LA ISSUE ASSIGNADA AL PROYECTO ACTUAL Y, A SU VEZ, CREAR COPIAS DE LA ISSUE EN
-LOS SUBPROYECTOS DEL PROYECTO ACTUAL (CREAR Y PROPAGAR ISSUE) -->
 <p class="buttons">
-  <!-- Reflejar en el :onclick la creación de la issue con los proyectos ya asignados (como al clickar en Crear y Crear y Continuar de la issue) -->
+  <!-- Reflejar en el :onclick la creación de la issue con los proyectos ya asignados (como al hacer click en Crear y Crear y Continuar de la issue) -->
   <%= submit_tag l(:button_apply), :name => nil, :onclick => "updateSelectedProjects();hideModal(this);",
                  :type => 'button', :id => 'button_create' %>
 </p>
@@ -122,11 +114,6 @@ LOS SUBPROYECTOS DEL PROYECTO ACTUAL (CREAR Y PROPAGAR ISSUE) -->
       $('input[value="Create"]').prop('disabled', false);
       $('input[name="continue_issue"]').toggle(true);
       $('input[name="continue"]').toggle(false);
-    /*} else {
-      $("#propagate").css("display", "none");
-      $('input[value="Create"]').prop('disabled', false);
-      $('input[name="continue_issue"]').toggle(true);
-      $('input[name="continue"]').toggle(false);*/
     } else if(htmlContent.length > 1) {
       $("#propagate").css("display", "inline");
       $('input[value="Create"]').prop('disabled', true);
@@ -166,24 +153,12 @@ LOS SUBPROYECTOS DEL PROYECTO ACTUAL (CREAR Y PROPAGAR ISSUE) -->
     selector = $.map(selectors, function(e) {
       return "input:checkbox[name='project_ids[]']:checkbox[data-"+id+e+"]"
     }).join(", ");
-    //for each matching value, select the checkbox
     $(selector).each(function() {
       $(this).attr("checked","checked") ;
     });
 
     $(".select_box_custom_field_value").prop('selectedIndex',0);
 
-    //var checkedUsers = $("input:checkbox[name='assigned_to_ids[]']");
-    //var checkedProjects = $("input:checkbox[name='project_ids[]']");
-
-     /*for(var i = 0, len = checkedProjects.length; i < len; i++) {
-     if(checkedProjects[i].checked){
-     checkedProjects[i].checked = true;
-     } else {
-     checkedProjects[i].checked = false;
-     //checkedProjects[0].checked = true;
-     }
-     }*/
   }
 
 </script>

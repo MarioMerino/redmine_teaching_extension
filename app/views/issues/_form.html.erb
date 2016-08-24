@@ -6,7 +6,7 @@
   <%= f.check_box :is_private, :no_label => true %><label class="inline" for="issue_is_private" id="issue_is_private_label"><%= l(:field_is_private) %></label>
 </p>
 <% end %>
-<!-- MOSTRAR SI EL PROYECTO DE LA ISSUE A COPIAR, NO TIENE SUBPROYECTOS... (SI !@issue.project.descendants.any?) -->
+<!-- Mostrar si el proyecto de la issue a copiar, no contiene subproyectos... (si !@issue.project.descendants.any?) -->
 <% if @issue.safe_attribute? 'project_id' %>
 <p>
   <%= f.select :project_id, project_tree_options_for_select(@issue.allowed_target_projects, :selected => @issue.project),  {:required => true},

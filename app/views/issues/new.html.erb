@@ -12,17 +12,8 @@
         <%= render :partial => 'issues/form', :locals => {:f => f} %>
       </div>
 
-      <%# if @issue.safe_attribute? 'assigned_to_id' %>
-      <%# select_options = principals_options_for_selection(@issue.assignable_users_subprojects, @issue.assigned_to) %>
-      <!--p id="members_form" style="display: none">
-        <%#= f.select :assigned_to_id, select_options, {:required => @issue.required_attribute?('assigned_to_id'), :include_blank => true, :label => l('assigned_students')},
-                     {:multiple => false, style: "display:none;"} %>
-        <%#= render 'projects_students_list' %>
-      </p-->
-      <%# end %>
       <!-- Listado de subproyectos seleccionados para llevar a cabo la propagacion de la issue: -->
-      <!-- MOSTRAR SELECT DE SUBPROYECTOS SÓLO EN LA VENTANA NEW (EN COPY, ¡NO!) -->
-      <% if !@copy_from #&& !@copy_from_subprojects %>
+      <% if !@copy_from %>
         <p id="projects_form">
           <% select_options = project_tree_options_for_select([@issue.project] | @issue.project.descendants, :selected => @issue.project) %>
           <%= f.select :project_id, select_options, {:required => false, :include_blank => false, :label => l("propagation_subprojects")}, :style => 'display:none;', :multiple => false %>
@@ -69,7 +60,7 @@
         <!-- HABILITAR QUE 'PROHIBIDO PULSAR BOTÓN DE PROPAGAR' SI NO SE HAN RELLENADO LOS CAMPOS OBLIGATORIOS DEL FORMULARIO: -->
       <%= link_to l("button_propagate"), plugin_teaching_extension_load_students_selection_path(:issue_id => @issue.id, :project_id => @issue.project.id), remote: true, id: "loadModalStudentsSelection", class: "load-modal-students-selection" %>
     <% end %>
-    <!-- OCULTAR EL BOTÓN DE PROPAGAR (SI EL PROYECTO SELECCIONADO NO CONTIENE SUBPROYECTOS O SI EL PROYECTO SELECCIONADO ES UN SUBPROYECTO) -->
+    <!-- Ocultar botón de Crear y Propagar, cuando el proyecto seleccionado no contiene subproyectos o si el proyecto seleccionado no es un subproyecto: -->
     <span id="propagate">
       <% if @copy_from #&& @copy_from.project.descendants.any? %>
           <%= submit_tag l(:button_create_propagation), :name => 'propagate', :id => "propagationButton" %> <!-- (al pulsar, propaga la issue a subproyectos) -->
@@ -102,7 +93,7 @@
     setTimeout(function(){ document.getElementById('propagationButton').click(); }, 100);
   });
 
-  // PROBAR A CREAR LA PROPAGACIÓN PULSANDO DIRECTAMENTE AL CREAR NUEVA ISSUE (VISTA DE NUEVA ISSUE -> CLICK EN 'CREAR Y CONTINUAR PARA PROPAGAR')
+  // FUNCIÓN DE PROPAGACIÓN.REALIZADA AL CREAR NUEVA ISSUE (VISTA DE NUEVA ISSUE -> CLICK EN 'CREAR Y CONTINUAR PARA PROPAGAR')
   $("#createAndPropagate").click(function(e) {
     var nextSubproject = $('#issue_project_id > option:selected').next('option');
     e.preventDefault();
@@ -112,7 +103,6 @@
     } else {
       $("#issue_project_id").val($("#issue_project_id option:first").val());
       form.submit();
-      //alert("Propagation finished!"); // Traducir alert a español e inglés...
       return;
     }
     setTimeout(function(){ document.getElementById('createAndPropagate').click(); }, 100);
