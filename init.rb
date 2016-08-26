@@ -1,12 +1,11 @@
 require 'redmine'
-#require 'redmine_teaching_extension/redmine_teaching_extension'
 
 ActionDispatch::Callbacks.to_prepare do
-  require_dependency 'redmine_teaching_extension/issues_controller'
+  require_dependency 'controller_rte/issues_controller'
+  require_dependency 'helper_rte/issues_helper'
+  require_dependency 'model_rte/issue'
   require_dependency 'redmine_teaching_extension/hooks'
-  require_dependency 'redmine_teaching_extension/issue'
   require_dependency 'redmine_teaching_extension/query'
-  require_dependency 'redmine_teaching_extension/issues_helper'
 end
 
 CHECKLISTS_VERSION_NUMBER = '0.0.1'

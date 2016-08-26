@@ -16,47 +16,6 @@ class Issue
     issue_visible?(usr) || other_project_visible(usr)
   end
 
-  # Usuarios de los subproyectos del proyecto principal, al que se le puede asignar la Issue
-=begin
-  def assignable_users_subprojects
-    subprojects = Project.where(:parent_id => project)
-    subproject_members = []
-    subprojects.each do |subproject|
-      subproject_members += Principal.member_of(subproject)
-    end
-    users = subproject_members
-    users << author if author
-    users << assigned_to if assigned_to
-    users.uniq.sort
-  end
-=end
-
-  # Copies attributes from another issue, arg can be an id or an Issue
-=begin
-  def copy_from_subprojects(arg, options={})
-    issue = arg.is_a?(Issue) ? arg : Issue.visible.find(arg)
-    self.attributes = issue.attributes.dup.except("id", "root_id", "parent_id", "lft", "rgt", "created_on", "updated_on")
-    self.custom_field_values = issue.custom_field_values.inject({}) {|h,v| h[v.custom_field_id] = v.value; h}
-    self.status = issue.status
-    self.author = User.current
-    unless options[:attachments] == false
-      self.attachments = issue.attachments.map do |attachement|
-        attachement.copyy(:container => self)
-      end
-    end
-    @copied_from = issue
-    @copy_options = options
-    self
-  end
-
-  # Returns an unsaved copy of the issue
-  def copyy(attributes=nil, copy_options={})
-    copy = self.class.new.copy_from_subprojects(self, copy_options)
-    copy.attributes = attributes if attributes
-    copy
-  end
-=end
-
   # Devuelve true si el usuario del sistema ó usuario actual tiene permiso para ver la issue
   # (nueva implementación del método 'visible?' existente en models/issue.rb)
   def other_project_visible?(usr = nil)
@@ -121,5 +80,20 @@ class Issue
     end
     notified
   end
+
+  # Usuarios de los subproyectos del proyecto principal, al que se le puede asignar la Issue
+=begin
+  def assignable_users_subprojects
+    subprojects = Project.where(:parent_id => project)
+    subproject_members = []
+    subprojects.each do |subproject|
+      subproject_members += Principal.member_of(subproject)
+    end
+    users = subproject_members
+    users << author if author
+    users << assigned_to if assigned_to
+    users.uniq.sort
+  end
+=end
 
 end
