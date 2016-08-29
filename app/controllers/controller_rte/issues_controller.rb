@@ -40,7 +40,7 @@ class IssuesController
   helper :timelog
   include Redmine::Export::PDF
 
-  # Función de carga de usuarios a partir de una issue:
+  # Función de carga de proyectos a partir de una issue:
   def load_students_selection
     #@issue = Issue.find(params[:id])
     if params[:issue_id]
@@ -152,22 +152,13 @@ class IssuesController
         format.html {
           render_attachment_warning_if_needed(@issue)
           flash[:notice] = l(:notice_issue_successful_create, :id => view_context.link_to("##{@issue.id}", issue_path(@issue), :title => @issue.subject))
-          if params[:continue]
+          if params[:continue] || params[:continue_issue]
             attrs = {:tracker_id => @issue.tracker, :parent_issue_id => @issue.parent_issue_id}.reject {|k,v| v.nil?}
             if @issue.project.parent_id
               redirect_to new_project_issue_path(@issue.project.parent_id, :issue => attrs)
             elsif @issue.project
               redirect_to new_project_issue_path(@issue.project, :issue => attrs)
               #redirect_to project_copy_issue_path(@project, @issue)
-            end
-            # REDIRECCIONAR A copy_from, Y PROPAGACION DE ISSUE REALIZADA A TODOS LOS SUBPROYECTOS DEL PROYECTO ACTUAL...
-          elsif params[:continue_issue]
-            attrss = {:tracker_id => @issue.tracker, :parent_issue_id => @issue.parent_issue_id}.reject {|k,v| v.nil?}
-            if @issue.project.parent_id
-              redirect_to new_project_issue_path(@issue.project.parent_id, :issue => attrss)
-            elsif @issue.project
-              redirect_to new_project_issue_path(@issue.project, :issue => attrss)
-              #redirect_to project_copy_issue_path(@project, @issue) # Habilitarlo si se desea llevar a cabo la propagación por el 2º metodo (desde la ventana de 'copy')
             end
           elsif params[:propagate]
             #redirect_to issue_path(@issue)
