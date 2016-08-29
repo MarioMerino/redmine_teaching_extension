@@ -12,7 +12,6 @@ class IssuesController
   before_filter :find_optional_project, :only => [:index]
   before_filter :check_for_default_issue_status, :only => [:new, :create]
   before_filter :build_new_issue_from_params, :only => [:new, :create, :update_form]
-  #before_filter :build_new_issue_subprojects_from_params, :only => [:new, :create]
   #append_before_filter :set_members, :only => [:create, :update]
 
   accept_rss_auth :index, :show

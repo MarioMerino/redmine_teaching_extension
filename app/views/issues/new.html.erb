@@ -57,12 +57,11 @@
     <!-- Enlace para abrir la ventana de diálogo (showModal()) donde se mostrará la selección de proyectos  -->
     <!-- Se genera la ruta de la issue en cuestión (...selection_path(id)) al pinchar en el enlace, para identificar sobre qué proyecto se está operando:  -->
     <% if @issue.project.descendants.any? && !@copy_from #&& !@copy_from_subprojects %>
-        <!-- HABILITAR QUE 'PROHIBIDO PULSAR BOTÓN DE PROPAGAR' SI NO SE HAN RELLENADO LOS CAMPOS OBLIGATORIOS DEL FORMULARIO: -->
       <%= link_to l("button_propagate"), plugin_teaching_extension_load_students_selection_path(:issue_id => @issue.id, :project_id => @issue.project.id), remote: true, id: "loadModalStudentsSelection", class: "load-modal-students-selection" %>
     <% end %>
     <!-- Ocultar botón de Crear y Propagar, cuando el proyecto seleccionado no contiene subproyectos o si el proyecto seleccionado no es un subproyecto: -->
     <span id="propagate">
-      <% if @copy_from #&& @copy_from.project.descendants.any? %>
+      <% if @copy_from %>
           <%= submit_tag l(:button_create_propagation), :name => 'propagate', :id => "propagationButton" %> <!-- (al pulsar, propaga la issue a subproyectos) -->
       <% end %>
     </span>
@@ -93,7 +92,7 @@
     setTimeout(function(){ document.getElementById('propagationButton').click(); }, 100);
   });
 
-  // FUNCIÓN DE PROPAGACIÓN.REALIZADA AL CREAR NUEVA ISSUE (VISTA DE NUEVA ISSUE -> CLICK EN 'CREAR Y CONTINUAR PARA PROPAGAR')
+  // FUNCIÓN DE PROPAGACIÓN REALIZADA AL CREAR NUEVA ISSUE (VISTA DE NUEVA ISSUE -> CLICK EN 'CREAR Y CONTINUAR PARA PROPAGAR')
   $("#createAndPropagate").click(function(e) {
     var nextSubproject = $('#issue_project_id > option:selected').next('option');
     e.preventDefault();

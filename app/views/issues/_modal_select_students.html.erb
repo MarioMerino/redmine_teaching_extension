@@ -45,10 +45,10 @@
 
 <div class="actions_links">
   <%= l("Selection") %>:
-  <!-- Botón de selección múltiple de proyectos del listado: -->
+  <!-- Botón de selección múltiple de subproyectos del listado: -->
   <%= link_to l("select_all"), '#', id: "link_select_all", :onclick => "select_all(event)" %>
   |
-  <!-- Botón de deselección múltiple de proyectos del listado (desmarcar todos los seleccionados): -->
+  <!-- Botón de deselección múltiple de subproyectos del listado (desmarcar todos los seleccionados): -->
   <%= link_to l("select_none"), '#', id: "link_select_all", :onclick => "select_none(event)" %>
   <!-- Selección individual de algunos de los proyectos de la caja de selección de proyectos: -->
   <hr>
@@ -70,13 +70,14 @@
 </div>
 <!-- Botón para guardar los cambios de la selección de proyectos para propagar Issue: -->
 <p class="buttons">
-  <!-- Reflejar en el :onclick la creación de la issue con los proyectos ya asignados (como al hacer click en Crear y Crear y Continuar de la issue) -->
   <%= submit_tag l(:button_apply), :name => nil, :onclick => "updateSelectedProjects();hideModal(this);",
                  :type => 'button', :id => 'button_create' %>
 </p>
 
 <script type="text/javascript">
 
+  // Estructura para controlar que cuando se selecciona un único subproyecto del listado,
+  // deshabilitar el resto:
   $("input:checkbox[name='project_ids[]']").change(function() {
     if($("input:checkbox[name='project_ids[]']:checked").length == 1) {
       $("input:checkbox:not(:checked)").prop('disabled', true);
@@ -85,7 +86,7 @@
     }
   });
 
-  // Función aplicada al seleccionar y/o actualizar algun miembro del listado de miembros/estudiantes:
+  // Función aplicada al seleccionar y/o actualizar algun miembro del listado de subproyectos/estudiantes:
   function updateSelectedProjects() {
 
     // Se obtienen todas las opciones de la seleccion de miembros, pasando el ID de los miembros:
@@ -109,11 +110,14 @@
 
     $("#projects_form #list_of_projects_per_issue").html(htmlContent);
 
+    // Estructura para controlar si no existen subproyectos seleccionados o si se ha seleccionado únicamente uno
+    // En este caso, deshabilitar botón de Crear y propagar, permitiendo sólo la creación individual de la petición:
     if(htmlContent == "" || htmlContent.length == 1) {
       $("#propagate").css("display", "none");
       $('input[value="Create"]').prop('disabled', false);
       $('input[name="continue_issue"]').toggle(true);
       $('input[name="continue"]').toggle(false);
+      // En caso contrario, habilitar el botón de Crear y propagar:
     } else if(htmlContent.length > 1) {
       $("#propagate").css("display", "inline");
       $('input[value="Create"]').prop('disabled', true);
@@ -122,7 +126,7 @@
     }
   }
 
-  // Función empleada al pinchar en selección múltiple de subproyectos (todos seleccionados):
+  // Función empleada al hacer clic en selección múltiple de subproyectos (todos seleccionados):
   function select_all(event){
     event.preventDefault();
 
@@ -132,7 +136,7 @@
     });
   }
 
-  // Función empleada al pinchar en deselección múltiple de subproyectos (ninguno seleccionado):
+  // Función empleada al hacer clic en desmarcar selección múltiple de subproyectos (ninguno seleccionado):
   function select_none(event){
     event.preventDefault();
 
@@ -142,7 +146,7 @@
     });
   }
 
-  // Función empleada al seleccionar algún miembro/alumno
+  // Función empleada al seleccionar algún subproyecto individual:
   function select_from_custom_field(event, id) {
     event.preventDefault();
     select_none(event);

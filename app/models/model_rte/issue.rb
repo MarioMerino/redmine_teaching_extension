@@ -10,14 +10,14 @@ class Issue
   self.singleton_class.send(:alias_method, :issue_visible_condition, :visible_condition)
 
 
-  # Comprobar si tanto los usuarios del sistema como el usuario actual, tienen permisos suficientes para ver la Issue,
-  # y llevar a cabo la propagación de la misma entre alumnos de la asignatura:
+  # Comprobar si tanto los usuarios del sistema como el usuario actual, tienen permisos suficientes para ver la Issue
+  # del Proyecto en cuestión, y llevar a cabo la propagación de la misma entre alumnos de la asignatura:
   def visible?(usr = nil)
     issue_visible?(usr) || other_project_visible(usr)
   end
 
-  # Devuelve true si el usuario del sistema ó usuario actual tiene permiso para ver la issue
-  # (nueva implementación del método 'visible?' existente en models/issue.rb)
+  # Devuelve true si el usuario del sistema ó usuario actual tiene permiso para visualizar
+  # la Issue de otros Proyectos externos
   def other_project_visible?(usr = nil)
     other_projects = self.projects - [self.project]
     other_projects_visibility = false
@@ -80,20 +80,4 @@ class Issue
     end
     notified
   end
-
-  # Usuarios de los subproyectos del proyecto principal, al que se le puede asignar la Issue
-=begin
-  def assignable_users_subprojects
-    subprojects = Project.where(:parent_id => project)
-    subproject_members = []
-    subprojects.each do |subproject|
-      subproject_members += Principal.member_of(subproject)
-    end
-    users = subproject_members
-    users << author if author
-    users << assigned_to if assigned_to
-    users.uniq.sort
-  end
-=end
-
 end

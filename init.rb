@@ -18,7 +18,5 @@ Redmine::Plugin.register :redmine_teaching_extension do
   url 'https://github.com/MarioMerino/RedmineTeachingExtension'
   author_url 'http://example.com/about'
   requires_redmine :version_or_higher => '0.0.1'
-
   #settings :default => { 'custom_fields' => [] }
-
 end
