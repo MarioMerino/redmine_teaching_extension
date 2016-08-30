@@ -63,24 +63,4 @@ class Issue
     end
     notified
   end
-
-  # Función que devuelve una consulta SQL usada para encontrar todas las issues visibles por el usuario especificado:
-=begin
-  def self.visible_condition(user, options={})
-    statement_by_role = {}
-    user.projects_by_role.each do |role, projects|
-      if role.allowed_to?(:view_issues) && projects.any?
-        statement_by_role[role] = "project_id IN (#{projects.collect(&:id).join(',')})"
-      end
-    end
-    authorized_projects = statement_by_role.values.join(' OR ')
-
-    if authorized_projects.present?
-      "(#{issue_visible_condition(user, options)} OR #{Issue.table_name}.id IN (SELECT issue_id FROM issues_projects WHERE (#{authorized_projects}) ))"
-    else
-      issue_visible_condition(user, options)
-    end
-  end
-=end
-
 end
