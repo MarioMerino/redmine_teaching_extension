@@ -7,8 +7,6 @@ ActionDispatch::Callbacks.to_prepare do
   require_dependency 'redmine_teaching_extension/hooks'
 end
 
-CHECKLISTS_VERSION_NUMBER = '0.0.1'
-
 Redmine::Plugin.register :redmine_teaching_extension do
   name 'Redmine Teaching Extension'
   author 'Mario Merino'
