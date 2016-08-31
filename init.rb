@@ -11,7 +11,7 @@ Redmine::Plugin.register :redmine_teaching_extension do
   name 'Redmine Teaching Extension'
   author 'Mario Merino'
   description 'Trabajo Fin de Grado para extender el sistema de peticiones de Redmine mediante un plugin para su uso en docencia'
-  version CHECKLISTS_VERSION_NUMBER
+  version '0.0.1'
   url 'https://github.com/MarioMerino/RedmineTeachingExtension'
   author_url 'http://example.com/about'
   requires_redmine :version_or_higher => '0.0.1'
