@@ -1,4 +1,4 @@
-# RedmineTeachingExtension
+# Redmine Teaching Extension
 
 Trabajo Fin de Grado del Grado en Ingeniería Informática de la Universidad de Almería.
 
