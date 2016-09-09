@@ -36,7 +36,6 @@ class IssuesController < ApplicationController
               redirect_to new_project_issue_path(@issue.project.parent_id, :issue => attrs)
             elsif @issue.project
               redirect_to new_project_issue_path(@issue.project, :issue => attrs)
-              #redirect_to project_copy_issue_path(@project, @issue)
             end
           elsif params[:propagate]
             #redirect_to issue_path(@issue)
