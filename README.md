@@ -10,7 +10,7 @@ Final Career Project of the Grade of Computer Sciences of the University of Alme
 It's a software product which extend the web-based project management and issue tracking tool _Redmine_ through a plugin for its use in teaching.
 Redmine Teaching Extension allows you to create a new issue in a root project and propagate it to its subprojects at the same time. So you can create the same issue, multiple times at once.
 
-h1. Installation notes
+Installation notes
 
 1. Copy your plugin directory into #{RAILS-ROOT}/plugins (Redmine 2.x). If you are downloading the plugin directly from GitHub, you can do so by changing into your plugin directory and issuing a command like @git clone git://github.com/MarioMerino/redmine_teaching_extension.git@
 
