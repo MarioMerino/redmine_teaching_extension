@@ -6,9 +6,11 @@ Se trata de un producto software cuyo objetivo es extender el sistema de gestió
 
 El propósito de *Redmine Teaching Extension* es llevar a cabo una nueva función de creación de nueva petición de Redmine desde un proyecto padre que contenga más de un subproyecto para, de este modo, posteriormente propagar dicha petición entre todos estos subproyectos.
 
+----
+
 Final Career Project of the Bachelor of Computer Sciences in the University of Almería.
 It's a software product which extend the web-based project management and issue tracking tool *Redmine* through a plugin for its use in teaching.
-Redmine Teaching Extension allows you to create a new issue in a root project and propagate it to its subprojects at the same time. So you can create the same issue, multiple times at once.
+*Redmine Teaching Extension* allows you to create a new issue in a root project and propagate it to its subprojects at the same time. So you can create the same issue, multiple times at once.
 
 ## Installation notes
 
