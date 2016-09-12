@@ -34,7 +34,7 @@
                      project.id,
                      @issue != nil && issue_projects.include?(project) && allowed_projects.include?(project),
                      disabled: allowed_projects.include?(project) ? false : true,
-                     #:class => ("inactive" unless allowed_projects.include?(project)),
+                     :class => ("inactive" unless allowed_projects.include?(project)),
                      data: custom_fields_data
                  ) + ' ' + h(project.name), :class => ("inactive" unless allowed_projects.include?(project)), :style => ("display:none;" unless allowed_projects.include?(project))
      )
@@ -115,12 +115,14 @@
     if(htmlContent == "" || htmlContent.length == 1) {
       $("#propagate").css("display", "none");
       $('input[value="Create"]').prop('disabled', false);
+      $('input[value="Crear"]').prop('disabled', false);
       $('input[name="continue_issue"]').toggle(true);
       $('input[name="continue"]').toggle(false);
       // En caso contrario, habilitar el botón de Crear y propagar:
     } else if(htmlContent.length > 1) {
       $("#propagate").css("display", "inline");
       $('input[value="Create"]').prop('disabled', true);
+      $('input[value="Crear"]').prop('disabled', true);
       $('input[name="continue_issue"]').toggle(false);
       $('input[name="continue"]').toggle(true);
     }

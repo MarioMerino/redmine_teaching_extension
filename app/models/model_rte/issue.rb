@@ -46,21 +46,4 @@ class Issue
     end
     other_projects_visibility
   end
-
-  # Función que devuelve el conjunto de usuarios del sistema que deben ser notificados de una issue asignada:
-  def notified_users
-    notified = issue_notified_users
-    notified_from_other_projects = notified_users_from_other_projects - notified
-    notified_from_other_projects.reject { |user| !other_project_visible?(user) } # Eliminar usuarios que no pueden visualizar la issue
-    notified_from_other_projects | notified
-  end
-
-  def notified_users_from_other_projects
-    notified = []
-    other_projects = self.projects - [self.project]
-    other_projects.each do |pr|
-      notified = notified | pr.notified_users
-    end
-    notified
-  end
 end
