@@ -15,8 +15,7 @@ Redmine Teaching Extension allows you to create a new issue in a root project an
 1. Copy your plugin directory into #{RAILS_ROOT}/plugins (Redmine 2.x). If you are downloading the plugin directly from GitHub, you can do so by changing into your plugin directory and issuing a command like `git clone git://github.com/MarioMerino/redmine_teaching_extension.git`
 
 2. If the plugin requires a migration, run the following command in #{RAILS_ROOT} to upgrade your database (make a db backup before)
-
-`bundle exec rake redmine:plugins:migrate RAILS_ENV=production`
+  `bundle exec rake redmine:plugins:migrate RAILS_ENV=production`
 
 3. Restart redmine
 
